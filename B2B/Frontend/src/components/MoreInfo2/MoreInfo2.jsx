@@ -13,6 +13,8 @@ import InnerImageZoom from "react-inner-image-zoom";
 import "react-inner-image-zoom/lib/styles.min.css";
 
 import img1 from "../../assets/productImg.png"; // fallback
+import emptyImg from "../../assets/Empty.png";
+
 import ProductCard from "../ProductCard/ProductCard";
 
 /* -------------------- helpers -------------------- */
@@ -57,6 +59,8 @@ const MoreInfo2 = () => {
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
   const [loading, setLoading] = useState(true);
   const [fetchErr, setFetchErr] = useState("");
+  const materials = ["9K", "10K", "14K", "18K"];
+  const [selectedMaterial, setSelectedMaterial] = useState("14K");
 
   const mainSwiperRef = useRef(null);
   const navigate = useNavigate();
@@ -282,6 +286,11 @@ const MoreInfo2 = () => {
   if (!product) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-16 text-center">
+        <img
+          src={emptyImg}
+          alt="Empty Wishlist"
+          className="mx-auto mb-6 w-[724px] h-[524px] opacity-50"
+        />
         <h2 className="text-2xl font-semibold mb-2">Product not found</h2>
         <p className="text-gray-600 mb-6">{fetchErr || "We couldn’t load this product."}</p>
         <button
@@ -356,6 +365,14 @@ const MoreInfo2 = () => {
           {/* Info */}
           <div>
             <h2 className="text-xl sm:text-2xl font-bold leading-snug">{name}</h2>
+            <h2 className="text-xl sm:text-2xl font-bold leading-snug">
+              SKU : SKU:AER-175
+              <span className="ml-3 border border-black px-2 py-1 text-[#CEBB98] rounded-md">
+                IN STOCK
+              </span>
+            </h2>
+
+
             <div className="flex flex-wrap items-center gap-3 mt-3">
               <span className="text-lg sm:text-2xl font-bold">₹{formatIN(finalPrice)}</span>
               {hasDiscount && (
@@ -372,37 +389,63 @@ const MoreInfo2 = () => {
             <p className="text-sm sm:text-base text-gray-600 mt-3 leading-relaxed">{desc}</p>
           </div>
 
+          <div className="flex flex-col gap-2 mb-2">
+            <span className="font-semibold">Color:</span>
+            <div className="flex gap-2">
+              {uiChips.map((key) => (
+                <button
+                  key={key}
+                  onClick={() => setVariant(key)}
+                  className={`w-8 h-8 rounded-full ${CHIP_CLASS[key]} border transition 
+          ${variant === key ? "ring-2 ring-[#CEBB98] scale-110" : "hover:scale-110"}`}
+                  title={key}
+                  aria-label={`Select ${key} color`}
+                />
+              ))}
+            </div>
+          </div>
+
+
+          <div className="flex flex-col gap-2">
+            <span className="font-semibold">Jewelry Material:</span>
+            <div className="flex gap-3">
+              {materials.map((mat) => (
+                <button
+                  key={mat}
+                  onClick={() => setSelectedMaterial(mat)}
+                  className={`px-4 py-1 rounded-md border transition 
+              ${selectedMaterial === mat
+                      ? "border-black bg-black text-white"
+                      : "border-gray-400 hover:bg-gray-100"
+                    }`}
+                >
+                  {mat}
+                </button>
+              ))}
+            </div>
+          </div>
+
+
+
           {/* Buttons + Color Chips */}
           <div className="flex flex-col gap-4 w-full">
             <div className="flex flex-col sm:flex-row gap-3 items-center w-full">
               <Link to="/inquiry" className="flex-1">
-              {/* Buy Now */}
-              <button
-                className={`w-full py-3 rounded-md font-semibold transition ${product?._id
+                {/* Buy Now */}
+                <button
+                  className={`w-full py-3 rounded-md font-semibold transition ${product?._id
                     ? "bg-[#CEBB98] text-white hover:bg-black"
                     : "bg-gray-300 text-gray-600 cursor-not-allowed"
-                  }`}
-              >
-                Inquiry Form
-              </button>
+                    }`}
+                >
+                  Inquiry Form
+                </button>
               </Link>
 
 
 
               {/* Variant Buttons (show other available colors; hide current) */}
-              <div className="flex gap-2">
-                {uiChips
-                  .filter((key) => key !== variant)
-                  .map((key) => (
-                    <button
-                      key={key}
-                      onClick={() => setVariant(key)}
-                      className={`w-8 h-8 rounded-full ${CHIP_CLASS[key]} border hover:scale-110 transition`}
-                      title={key}
-                      aria-label={`Select ${key} color`}
-                    />
-                  ))}
-              </div>
+
             </div>
 
             {/* WhatsApp */}

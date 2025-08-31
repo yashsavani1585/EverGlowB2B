@@ -235,7 +235,7 @@ const NewInStore = () => {
     <section className="w-full bg-white py-12 overflow-hidden">
       {/* Heading */}
       <div className="text-center mb-10">
-        <h2 className="text-3xl md:text-4xl font-semibold text-black">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-black">
           NEW IN STORE
         </h2>
       </div>
@@ -244,13 +244,25 @@ const NewInStore = () => {
       <div className="w-full flex justify-center">
         <Swiper
           modules={[Autoplay]}
-          slidesPerView={3}
-          spaceBetween={0} // 🔑 no extra gap
           centeredSlides={true}
           loop={true}
           autoplay={{
             delay: 4000,
             disableOnInteraction: false,
+          }}
+          breakpoints={{
+            0: {
+              slidesPerView: 1.3, // show part of next img
+              spaceBetween: 12,
+            },
+            640: {
+              slidesPerView: 2.2,
+              spaceBetween: 16,
+            },
+            1024: {
+              slidesPerView: 3,
+              spaceBetween: 20,
+            },
           }}
           className="w-full max-w-6xl"
         >
@@ -264,13 +276,15 @@ const NewInStore = () => {
                   className={`transition-all duration-500 ease-in-out flex justify-center items-center ${
                     isActive
                       ? "scale-110 opacity-100 z-10" // active (center) image bigger
-                      : "scale-75 opacity-70" // side images smaller
+                      : "scale-90 opacity-70"
                   }`}
                 >
                   <img
                     src={product.img}
                     alt="product"
-                    className="w-[290px] h-[360px] md:w-[300px] md:h-[420px] object-cover rounded-md"
+                    className="w-full max-w-[250px] sm:max-w-[280px] md:max-w-[300px] 
+                               h-[280px] sm:h-[340px] md:h-[420px]
+                               object-cover rounded-lg shadow-md"
                   />
                 </div>
               )}

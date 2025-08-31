@@ -5,7 +5,7 @@ import diamondRing from "../../assets/EverGlowOffer3.png";
 
 const LatestOffers = () => {
   return (
-    <section className="w-full bg-white py-6 px-2 mt-4 sm:px-6 md:px-12">
+        <section className="w-full bg-white pt-0 pb-10 px-4 sm:px-6 md:px-12">
       {/* Heading */}
       <div className="text-center mb-6">
         <h2 className="text-xl sm:text-2xl md:text-4xl font-semibold text-black">

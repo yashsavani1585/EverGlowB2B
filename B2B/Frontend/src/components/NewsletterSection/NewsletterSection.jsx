@@ -3,7 +3,7 @@ import React from 'react';
 // Main component for the Newsletter Subscription section
 const Newsletter = () => {
   return (
-    <section className="w-full bg-white  mb-4 sm:py-16 px-4 sm:px-4 lg:px-8">
+<section className="w-full bg-white mt-4 sm:mt-0 pt-0 sm:pt-2 pb-10 px-4 sm:px-6 md:px-12">
       <div className="max-w-2xl mx-auto text-center">
 
         {/* Heading */}
