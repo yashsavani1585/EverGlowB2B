@@ -142,11 +142,18 @@ import toast, { Toaster } from "react-hot-toast";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/material.css";
 
-import Round from "../../assets/Round.png";
-import Princess from "../../assets/Princess.png";
-import Emerald from "../../assets/EmerAld.png";
-import Oval from "../../assets/Oval.png";
-import Pear from "../../assets/Pear.png";
+import Round from "../../assets/Round.jpg";
+import Princess from "../../assets/Princess.svg";
+import Emerald from "../../assets/Emerald.jpg";
+import Oval from "../../assets/Oval.jpg";
+import Pear from "../../assets/Pear.svg";
+import Heart from "../../assets/Heart.jpg";
+import Asscher from "../../assets/Asscher.jpg";
+import Marquise from "../../assets/Marquise.svg";
+import Hybrid from "../../assets/Hybrid.jpg";
+import Antique from "../../assets/Antique.jpg";
+import Radiant from "../../assets/Radiant.jpg";
+import Cushion from "../../assets/Cushion.jpg";
 
 const diamondsOptions = [
     { name: "Round", photo: Round },
@@ -154,6 +161,13 @@ const diamondsOptions = [
     { name: "Emerald", photo: Emerald },
     { name: "Oval", photo: Oval },
     { name: "Pear", photo: Pear },
+    { photo: Heart, name: "Heart" },
+    { photo: Asscher, name: "Asscher" },
+    { photo: Marquise, name: "Marquise" },
+    { photo: Hybrid, name: "Hybrid" },
+    { photo: Antique, name: "Antique" },
+    { photo: Radiant, name: "Radiant" },
+    { photo: Cushion, name: "Cushion" }
 ];
 
 const InquiryForm = () => {
@@ -178,19 +192,19 @@ const InquiryForm = () => {
         const selectedDiamond = diamondsOptions.find(d => d.name === e.target.value);
         setFormData({ ...formData, diamond: selectedDiamond });
         if (selectedDiamond) {
-            toast.success(`Selected: ${selectedDiamond.name} ✅`, { duration: 2000 });
+            toast.success(`Selected: ${selectedDiamond.name}`, { duration: 2000 });
         }
     };
 
     const incrementQuantity = () => {
         setFormData({ ...formData, diamondQuantity: formData.diamondQuantity + 1 });
-        toast(`Quantity increased: ${formData.diamondQuantity + 1}`, { icon: "🔼", duration: 1500 });
+        toast(`Quantity increased: ${formData.diamondQuantity + 1}`, {  duration: 1500 });
     };
 
     const decrementQuantity = () => {
         if (formData.diamondQuantity > 1) {
             setFormData({ ...formData, diamondQuantity: formData.diamondQuantity - 1 });
-            toast(`Quantity decreased: ${formData.diamondQuantity - 1}`, { icon: "🔽", duration: 1500 });
+            toast(`Quantity decreased: ${formData.diamondQuantity - 1}`, {  duration: 1500 });
         } else {
             toast.error("Quantity cannot be less than 1", { duration: 2000 });
         }
@@ -227,7 +241,7 @@ const InquiryForm = () => {
         }
 
         // Submission success
-        toast.success("Inquiry submitted successfully ✅", { duration: 2500 });
+        toast.success("Inquiry submitted successfully", { duration: 2500 });
 
         console.log("Submitted Data:", formData);
 
@@ -312,14 +326,29 @@ const InquiryForm = () => {
                         onChange={handleDiamondSelect}
                         className="mt-5 mb-4"
                     >
+                        {/* None Option */}
+                        <MenuItem value="">
+                            <em>None</em>
+                        </MenuItem>
+
+                        {/* Diamond Options */}
                         {diamondsOptions.map((diamond) => (
-                            <MenuItem key={diamond.name} value={diamond.name} className="flex items-center space-x-2">
-                                <img src={diamond.photo} alt={diamond.name} className="w-6 h-6 object-cover rounded" />
+                            <MenuItem
+                                key={diamond.name}
+                                value={diamond.name}
+                                className="flex items-center space-x-2"
+                            >
+                                <img
+                                    src={diamond.photo}
+                                    alt={diamond.name}
+                                    className="w-6 h-6 object-cover rounded"
+                                />
                                 <span>{diamond.name}</span>
                             </MenuItem>
                         ))}
                     </Select>
                 </FormControl>
+
 
                 {/* Diamond Quantity */}
                 {formData.diamond && (
