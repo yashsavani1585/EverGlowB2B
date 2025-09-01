@@ -6,7 +6,7 @@ import PromotionalBanner1 from "../../assets/productAds6.png";
 import useCategoryProducts from "../../hooks/useCategoryProducts";
 
 const PendantsetProductionSection = () => {
-  const { items: products = [], loading } = useCategoryProducts("pendantset");
+  const { items: products = [], loading } = useCategoryProducts("pendant-set");
 
   if (loading) {
     return (

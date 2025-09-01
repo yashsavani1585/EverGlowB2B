@@ -676,13 +676,15 @@ const TestimonialSection = () => {
           See what our clients have to say
         </p>
       </div>
-      <section className="relative flex flex-col items-center justify-center min-h-screen w-full p-6 sm:p-8 lg:p-12 overflow-hidden bg-[#CEBB98] font-['Inter']">
+
+      {/* ↓↓↓ shorter height on < lg; full screen on lg+ ↓↓↓ */}
+      <section className="relative flex flex-col items-center justify-center min-h-[50vh] sm:min-h-[76vh] md:min-h-[84vh] lg:min-h-screen w-full p-1 sm:p-8 lg:p-12 overflow-hidden bg-[#CEBB98] font-['Inter']">
 
         {/* ==== GRID LINES (only desktop) ==== */}
         <div className="hidden lg:block absolute top-[20%] left-0 h-px w-[90%] bg-black"></div>
         <div className="hidden lg:block absolute bottom-[20%] left-0 h-px w-full bg-black"></div>
-        <div className="hidden lg:block absolute top-36  left-[22%] w-px h-full bg-black"></div>
-        <div className="hidden lg:block absolute  bottom-36 right-[22%] w-px h-full bg-black"></div>
+        <div className="hidden lg:block absolute top-36 left-[22%] w-px h-full bg-black"></div>
+        <div className="hidden lg:block absolute bottom-36 right-[22%] w-px h-full bg-black"></div>
 
         {/* ==== Decorative Stars ==== */}
         <svg
@@ -761,10 +763,9 @@ const TestimonialSection = () => {
             {reviews.map((_, index) => (
               <span
                 key={index}
-                className={`w-2 h-2 rounded-full ${currentReview === index
-                    ? "bg-white"
-                    : "bg-white opacity-50"
-                  }`}
+                className={`w-2 h-2 rounded-full ${
+                  currentReview === index ? "bg-white" : "bg-white opacity-50"
+                }`}
               ></span>
             ))}
           </div>

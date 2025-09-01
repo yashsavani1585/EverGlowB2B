@@ -75,9 +75,11 @@ const Home = () => {
         <TestimonialSection />
       </Suspense>
 
+      <div className="mb-10">
       <Suspense fallback={<Loader />}>
         <EverglowPromise />
       </Suspense>
+      </div>
 
       <div className="hidden md:block">
         <Suspense fallback={<Loader />}>

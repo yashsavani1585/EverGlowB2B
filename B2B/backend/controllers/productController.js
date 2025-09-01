@@ -228,10 +228,8 @@ const removeProduct = async (req, res) => {
 // function for single product info
 const singleProduct = async (req, res) => {
   try {
-    console.log(req.body)
     const { productId } = req.body;
     const product = await productModel.findById(productId);
-    console.log(product)
     res.json({ success: true, product });
   } catch (error) {
     console.log(error);
@@ -246,6 +244,7 @@ const getProductsByCategory = async (req, res) => {
     const { category } = req.params;
     const products = await productModel.find({ category });
     res.json({ success: true, products });
+    
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });

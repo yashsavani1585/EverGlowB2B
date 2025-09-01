@@ -10,6 +10,7 @@ import wishlistRouter from './routes/wishlistRoute.js'
 import orderRouter from './routes/orderRoute.js'
 import session from "express-session";
 import authRoutes from "./routes/auth.routes.js";
+import formsRouter from "./routes/forms.routes.js";
 
 // App Config
 const app = express()
@@ -39,6 +40,8 @@ app.use('/api/cart', cartRouter)
 app.use('/api/order', orderRouter)
 app.use("/api/auth", authRoutes);
 app.use("/api/wishlist", wishlistRouter);
+app.use("/api/forms", formsRouter);
+
 
 app.get('/',(req,res)=>{
     res.send("API Working")

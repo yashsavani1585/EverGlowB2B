@@ -249,22 +249,22 @@ const MoreInfo2 = () => {
     {
       id: 1,
       title: "Brilliant Round cut Everglow jewels",
-      oldPrice: `₹${formatIN(3299)}`,
-      price: `₹${formatIN(2699)}`,
+      oldPrice: `${formatIN(3299)}`,
+      price: `${formatIN(2699)}`,
       image: imagesToShow[0] || img1,
     },
     {
       id: 2,
       title: "Elegant Gold Necklace",
-      oldPrice: `₹${formatIN(4999)}`,
-      price: `₹${formatIN(4599)}`,
+      oldPrice: `${formatIN(4999)}`,
+      price: `${formatIN(4599)}`,
       image: imagesToShow[1] || imagesToShow[0] || img1,
     },
     {
       id: 3,
       title: "Classic Diamond Ring",
-      oldPrice: `₹${formatIN(5999)}`,
-      price: `₹${formatIN(5599)}`,
+      oldPrice: `${formatIN(5999)}`,
+      price: `${formatIN(5599)}`,
       image: imagesToShow[2] || imagesToShow[0] || img1,
     },
   ];

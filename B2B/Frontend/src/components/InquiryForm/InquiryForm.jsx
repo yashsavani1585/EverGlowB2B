@@ -1,55 +1,77 @@
 import React, { useState } from "react";
+import axios from "axios";
 import { TextField } from "@mui/material";
 import toast, { Toaster } from "react-hot-toast";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/material.css";
 
+const API = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000/api";
+
 const InquiryForm = () => {
-    const [formData, setFormData] = useState({
-        firstName: "",
-        email: "",
-        mobile: "",
-        itemDetails: "",
-    });
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    email: "",
+    mobile: "",
+    itemDetails: "",
+  });
 
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
+  const handleChange = (e) => {
+    setFormData((f) => ({ ...f, [e.target.name]: e.target.value }));
+  };
 
-    const handlePhoneChange = (value) => {
-        setFormData({ ...formData, mobile: value ? String(value) : "" });
-    };
+  const handlePhoneChange = (value) => {
+    setFormData((f) => ({ ...f, mobile: value ? String(value) : "" }));
+  };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+  const validate = () => {
+    if (!formData.firstName || !formData.email || !formData.mobile || !formData.itemDetails) {
+      toast.error("All fields are required!");
+      return false;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      toast.error("Enter a valid email!");
+      return false;
+    }
+    if (formData.mobile.replace(/\D/g, "").length < 6) {
+      toast.error("Enter a valid mobile number!");
+      return false;
+    }
+    return true;
+  };
 
-        if (!formData.firstName || !formData.email || !formData.mobile || !formData.itemDetails) {
-            toast.error("All fields are required!");
-            return;
-        }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validate()) return;
 
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(formData.email)) {
-            toast.error("Enter a valid email!");
-            return;
-        }
+    try {
+      setLoading(true);
+      // map FE fields → backend fields
+      const payload = {
+        name: formData.firstName,
+        email: formData.email,
+        phone: formData.mobile,
+        message: formData.itemDetails,
+      };
 
-        if (formData.mobile.replace(/\D/g, "").length < 6) {
-            toast.error("Enter a valid mobile number!");
-            return;
-        }
+      const { data } = await axios.post(`${API}/forms/inquiry`, payload, {
+        headers: { "Content-Type": "application/json" },
+      });
 
+      if (data?.success) {
         toast.success("Inquiry submitted successfully ✅");
-        console.log("Submitted Data:", formData);
-
-        setFormData({
-            firstName: "",
-            email: "",
-            mobile: "",
-            itemDetails: "",
-        });
-    };
-
+        setFormData({ firstName: "", email: "", mobile: "", itemDetails: "" });
+      } else {
+        toast.error(data?.message || "Submit failed");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(err?.response?.data?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
     return (
         <div className="flex items-center justify-center min-h-screen  p-4">
             <Toaster position="top-right" reverseOrder={false} />
@@ -123,10 +145,11 @@ const InquiryForm = () => {
                 {/* Submit Button */}
                 <button
                     type="submit"
+                    disabled={loading}
                     className="w-full py-2 rounded-lg font-medium text-white transition duration-300 hover:opacity-90 h-[50px] mb-4 mt-4"
                     style={{ backgroundColor: "#CEBB98" }}
                 >
-                    Submit Inquiry
+                     {loading ? "Submitting..." : "Submit Inquiry"}
                 </button>
             </form>
         </div>
