@@ -31,6 +31,9 @@
 
 
 import React, { Suspense, lazy } from "react";
+import DimondCategorySection from "../../components/DimondCategorySection/DimondCategorySection";
+import PromiseSection from "../../components/Promise/Promise";
+import CertifiedText from "../../components/CertifiedText/CertifiedText";
 
 // 🔹 Lazy-loaded components
 const HeroSection = lazy(() => import("../../components/HeroSection/HeroSection"));
@@ -60,6 +63,10 @@ const Home = () => {
       </Suspense>
 
       <Suspense fallback={<Loader />}>
+      <DimondCategorySection/>
+      </Suspense>
+
+      <Suspense fallback={<Loader />}>
         <GiftingGuide />
       </Suspense>
 
@@ -80,6 +87,14 @@ const Home = () => {
         <EverglowPromise />
       </Suspense>
       </div>
+
+      <Suspense fallback={<Loader />}>
+        <PromiseSection />
+      </Suspense>
+
+      <Suspense fallback={<Loader />}>
+        <CertifiedText/>
+      </Suspense>
 
       <div className="hidden md:block">
         <Suspense fallback={<Loader />}>

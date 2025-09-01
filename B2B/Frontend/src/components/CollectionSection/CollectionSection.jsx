@@ -6,7 +6,7 @@ const CollectionSection = () => {
   const galleryLinks = ["Bracelets", "Rings", "Earrings"];
 
   return (
-    <section className="w-full bg-white py-0 px-1 md:px-5 m-0">
+    <section className="w-full bg-white pt-0 pb-10 px-4 sm:px-6 md:px-12 mt-10">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start justify-between gap-12">
         {/* Left Side: Image */}
         <div className="w-full md:w-1/2 flex justify-center">
