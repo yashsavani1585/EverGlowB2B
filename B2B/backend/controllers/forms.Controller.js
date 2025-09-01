@@ -37,6 +37,16 @@ import { v2 as cloudinary } from "cloudinary";
 import PersonalizedRequest from "../models/PersonalizedRequest.js";
 import Inquiry from "../models/Inquiry.js";
 
+
+const normalizeDiamond = (diamond) => {
+  if (!diamond || typeof diamond !== "object") return null;
+  const name = String(diamond.name || "").trim();
+  const photo = String(diamond.photo || "").trim();
+  if (!name) return null;
+  return { name, photo };
+};
+
+
 // PUBLIC: submit personalized request (supports image/pdf/doc/docx via uploadFormFile)
 export const createPersonalized = async (req, res) => {
   let fileUrl = null;
@@ -83,11 +93,14 @@ export const createPersonalized = async (req, res) => {
 // PUBLIC: submit inquiry (no file by default; add uploadFormFile in route if needed)
 export const createInquiry = async (req, res) => {
   try {
-    const { name, phone, email, message, topic, userId } = req.body;
+    const { name, phone, email, message, topic, userId , diamond, diamondQuantity} = req.body;
 
     if (!name || !email || !message) {
       return res.status(400).json({ success: false, message: "Missing required fields." });
     }
+
+    const Diamond = normalizeDiamond(diamond);
+    const qty = Number.isFinite(Number(diamondQuantity)) ? Math.max(1, Math.min(50, Number(diamondQuantity))) : 1;
 
     const doc = await Inquiry.create({
       userId: userId || null,
@@ -95,7 +108,9 @@ export const createInquiry = async (req, res) => {
       phone: phone || "",
       email,
       message,
-      topic: topic || "general",
+      topic: (topic || (Diamond ? "diamond-inquiry" : "general")).trim(),
+      diamond: Diamond,
+      diamondQuantity: Diamond ? qty : 1,
     });
 
     return res.json({ success: true, data: doc });

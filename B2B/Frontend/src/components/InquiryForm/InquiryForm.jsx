@@ -219,10 +219,19 @@ const InquiryForm = () => {
             toast.error("Item Details are required!");
             return;
         }
+        if (formData.diamond && (!Number.isFinite(Number(formData.diamondQuantity)) || Number(formData.diamondQuantity) < 1)) {
+            toast.error("Diamond quantity must be at least 1");
+            return false;
+    }
     return true;
-  };    
+  };
 
 const handleDiamondSelect = (e) => {
+     const selectedName = e.target.value;
+    if (!selectedName) {
+      setFormData((f) => ({ ...f, diamond: null, diamondQuantity: 1 }));
+      return;
+    }
         const selectedDiamond = diamondsOptions.find(d => d.name === e.target.value);
         setFormData({ ...formData, diamond: selectedDiamond });
         if (selectedDiamond) {
@@ -257,6 +266,11 @@ const handleDiamondSelect = (e) => {
         email: formData.email,
         phone: formData.mobile,
         message: formData.itemDetails,
+        topic: formData.diamond ? "diamond-inquiry" : "general",
+        diamond: formData.diamond
+        ? { name: formData.diamond.name, photo: formData.diamond.photo || "" }
+        : null,
+      diamondQuantity: formData.diamond ? formData.diamondQuantity : 1,
       };
 
       const { data } = await axios.post(`${API}/forms/inquiry`, payload, {
@@ -342,10 +356,16 @@ const handleDiamondSelect = (e) => {
 
                 {/* Diamond Select */}
                 <FormControl fullWidth>
-                    <InputLabel className="mt-3">Diamond Type (Optional)</InputLabel>
+                    <InputLabel id="diamond-type-label" className="mt-3">Diamond Type (Optional)</InputLabel>
                     <Select
+                        labelId="diamond-type-label"
+                        id="diamond-type"
                         value={formData.diamond ? formData.diamond.name : ""}
+                        label="Diamond Type (Optional)"
                         onChange={handleDiamondSelect}
+                        renderValue={(selected) =>
+                        selected ? selected : <span className="text-gray-400">None</span>
+                        }
                         className="mt-5 mb-4"
                     >
                         {/* None Option */}
