@@ -460,7 +460,9 @@ useEffect(() => {
 
           {/* Buttons + Color Chips */}
           <div className="flex flex-col gap-4 w-full">
-            <div className="flex flex-col sm:flex-row gap-3 items-center w-full">
+
+            
+            <div className="flex flex-col  gap-3  w-full">
               <Link to="/inquiry" className="flex-1">
                 {/* Buy Now */}
                 <button
