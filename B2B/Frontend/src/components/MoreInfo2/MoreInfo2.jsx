@@ -61,6 +61,7 @@ const MoreInfo2 = () => {
   const [fetchErr, setFetchErr] = useState("");
   const materials = ["9K", "10K", "14K", "18K"];
   const [selectedMaterial, setSelectedMaterial] = useState("14K");
+   const [liveRate, setLiveRate] = useState(null); // ₹/g for selectedMaterial
 
   const mainSwiperRef = useRef(null);
   const navigate = useNavigate();
@@ -81,6 +82,29 @@ const MoreInfo2 = () => {
   };
 
   /* ---------- fetch product ---------- */
+    useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        setPriceErr("");
+        const { data } = await axios.get(`${backendUrl}/pricing/gold-rate`, {
+          params: { carat: caratParam(selectedMaterial) }
+        });
+        if (!active) return;
+        if (data?.success && typeof data.ratePerGram === "number") {          
+          setLiveRate(data.ratePerGram);
+        } else {
+          setPriceErr("Live rate unavailable. Using base price.");
+          setLiveRate(null);
+        }
+      } catch (e) {
+        setPriceErr("Live rate error. Using base price.");
+        setLiveRate(null);
+      }
+    })();
+    return () => { active = false; };
+  }, [selectedMaterial]);
+
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -150,8 +174,8 @@ const MoreInfo2 = () => {
 
   // colors available (canonical) -> MUST come before using selectedColor anywhere
   // const availableColors = useMemo(
-  //   () => (product?.imagesByColor ? Object.keys(product.imagesByColor).map(normalize) : []),
-  //   [product]
+  // 	 () => (product?.imagesByColor ? Object.keys(product.imagesByColor).map(normalize) : []),
+  // 	 [product]
   // );
   const availableColors = useMemo(() => {
     const src = product?.imagesByColor;
@@ -167,11 +191,20 @@ const MoreInfo2 = () => {
   }, [variant, availableColors]);
 
   // purity – now safely depends on selectedColor
-  const purity = useMemo(() => {
-    const map = product?.caratByColor || {};
-    const chosen = selectedColor && map[selectedColor];
-    return chosen || map.gold || "14k Yellow Gold";
-  }, [product?.caratByColor, selectedColor]);
+// current color (gold / rose-gold / white-gold)
+const purity = useMemo(() => {
+  const map = product?.caratByColor || {};
+  const fromColor = selectedColor && map[selectedColor];
+
+  // if user clicked a material (9K, 10K, 14K, 18K) → show that
+  if (selectedMaterial) {
+    return `${selectedMaterial} ${product?.defaultColor ? `(${product.defaultColor})` : ""}`;
+  }
+
+  // fallback to backend carat map
+  return fromColor || map.gold || "14K Yellow Gold";
+}, [product?.caratByColor, selectedColor, selectedMaterial, product?.defaultColor]);
+
 
   // Normalize image field to array
   const rawImages = useMemo(() => {
@@ -183,20 +216,6 @@ const MoreInfo2 = () => {
     () => (rawImages.length ? rawImages : [img1]),
     [rawImages]
   );
-
-  // 1) if backend sends grouped images
-  // const imagesByColorFromApi =
-  //   product?.imagesByColor && typeof product.imagesByColor === "object"
-  //     ? {
-  //         gold: Array.isArray(product.imagesByColor.gold) ? product.imagesByColor.gold : [],
-  //         "rose-gold": Array.isArray(product.imagesByColor["rose-gold"])
-  //           ? product.imagesByColor["rose-gold"]
-  //           : [],
-  //         "white-gold": Array.isArray(product.imagesByColor["white-gold"])
-  //           ? product.imagesByColor["white-gold"]
-  //           : [],
-  //       }
-  //     : null;
 
   // 1) if backend sends grouped images (normalize keys like "rose" -> "rose-gold")
   const imagesByColorFromApi = useMemo(() => {
@@ -211,6 +230,22 @@ const MoreInfo2 = () => {
     }
     return out;
   }, [product]);
+
+  const [priceErr, setPriceErr] = useState("")
+const gstPct = Number(product?.gstPercent ?? 3);
+const mcPerGram = Number(product?.makingChargePerGram || 0);
+const goldWeight = Number(product?.specs?.goldWeight || 0);
+const metalCost = liveRate ? Math.max(0, liveRate) * Math.max(0, goldWeight) : 0;
+const makingCost = mcPerGram * Math.max(0, goldWeight);
+const dynamicSubTotal = liveRate ? (metalCost + makingCost) : finalPrice + (product?.specs?.makingCharge || 0);
+const gstAmount = Math.round((dynamicSubTotal * (gstPct / 100)));
+const dynamicTotal = dynamicSubTotal + gstAmount;
+// helper: carat string used by backend
+const caratParam = (mat) => (typeof mat === "string" ? mat.toUpperCase().replace("K","") : "14");
+const skuForColor = useMemo(() => {
+  const map = product?.skuByColor || {};
+  return (selectedColor && map[selectedColor]) || map[product?.defaultColor] || "";
+}, [product?.skuByColor, selectedColor, product?.defaultColor]);
 
 
   // buckets
@@ -249,29 +284,30 @@ const MoreInfo2 = () => {
 
 
   // related demo cards (use real product image as placeholder)
-  const productsDemo = [
-    {
-      id: 1,
-      title: "Brilliant Round cut Everglow jewels",
-      oldPrice: `${formatIN(3299)}`,
-      price: `${formatIN(2699)}`,
-      image: imagesToShow[0] || img1,
-    },
-    {
-      id: 2,
-      title: "Elegant Gold Necklace",
-      oldPrice: `${formatIN(4999)}`,
-      price: `${formatIN(4599)}`,
-      image: imagesToShow[1] || imagesToShow[0] || img1,
-    },
-    {
-      id: 3,
-      title: "Classic Diamond Ring",
-      oldPrice: `${formatIN(5999)}`,
-      price: `${formatIN(5599)}`,
-      image: imagesToShow[2] || imagesToShow[0] || img1,
-    },
-  ];
+  const [related, setRelated] = useState([]);
+
+useEffect(() => {
+  if (!productId) return;
+  (async () => {
+    try {
+      const { data } = await axios.get(`${backendUrl}/product/related/${productId}`);
+      if (data?.success) setRelated(data.products || []);
+    } catch (err) {
+      console.error("Failed to fetch related:", err);
+    }
+  })();
+}, [productId]);
+
+
+  /* -------------------- THE FIX IS HERE -------------------- */
+  // Effect to reset the main swiper slide when the color filter changes.
+  useEffect(() => {
+    if (mainSwiperRef.current) {
+      mainSwiperRef.current.slideTo(0);
+    }
+  }, [selectedColor]);
+  /* --------------------------------------------------------- */
+
 
   /* ---------- loading ---------- */
   if (loading) {
@@ -365,27 +401,22 @@ const MoreInfo2 = () => {
           {/* Info */}
           <div>
             <h2 className="text-xl sm:text-2xl font-bold leading-snug">{name}</h2>
-            <h2 className="text-xl sm:text-2xl font-bold leading-snug">
-              SKU : SKU:AER-175
-              <span className="ml-3 border border-black px-2 py-1 text-[#CEBB98] rounded-md">
-                IN STOCK
-              </span>
-            </h2>
+<div className="mt-1 text-sm text-gray-700">
+  {skuForColor ? <>SKU: <span className="font-semibold">{skuForColor}</span></> : "SKU: —"}
+  <span className="ml-3 border border-black px-2 py-0.5 rounded-md text-[#CEBB98]">IN STOCK</span>
+</div>
 
 
             <div className="flex flex-wrap items-center gap-3 mt-3">
-              <span className="text-lg sm:text-2xl font-bold">₹{formatIN(finalPrice)}</span>
-              {hasDiscount && (
-                <span className="text-gray-500 line-through text-sm sm:text-base">
-                  ₹{formatIN(price)}
-                </span>
-              )}
-              {hasDiscount && (
-                <span className="bg-gray-100 text-xs sm:text-sm px-2 sm:px-3 py-1 rounded-full border">
-                  Sale {pct}%
-                </span>
-              )}
+              <span className="text-lg sm:text-2xl font-bold">₹{formatIN(liveRate ? dynamicTotal : finalPrice)}</span>
+              {!liveRate && hasDiscount && (
+    <span className="text-gray-500 line-through text-sm sm:text-base">₹{formatIN(price)}</span>
+  )}
+              {!liveRate && hasDiscount && (
+    <span className="bg-gray-100 text-xs sm:text-sm px-2 sm:px-3 py-1 rounded-full border">Sale {pct}%</span>
+  )}
             </div>
+            {priceErr && <p className="text-xs text-red-500 mt-1">{priceErr}</p>}
             <p className="text-sm sm:text-base text-gray-600 mt-3 leading-relaxed">{desc}</p>
           </div>
 
@@ -396,7 +427,7 @@ const MoreInfo2 = () => {
                 <button
                   key={key}
                   onClick={() => setVariant(key)}
-                  className={`w-8 h-8 rounded-full ${CHIP_CLASS[key]} border transition 
+                  className={`w-8 h-8 rounded-full ${CHIP_CLASS[key]} border transition
           ${variant === key ? "ring-2 ring-[#CEBB98] scale-110" : "hover:scale-110"}`}
                   title={key}
                   aria-label={`Select ${key} color`}
@@ -413,7 +444,7 @@ const MoreInfo2 = () => {
                 <button
                   key={mat}
                   onClick={() => setSelectedMaterial(mat)}
-                  className={`px-4 py-1 rounded-md border transition 
+                  className={`px-4 py-1 rounded-md border transition
               ${selectedMaterial === mat
                       ? "border-black bg-black text-white"
                       : "border-gray-400 hover:bg-gray-100"
@@ -434,8 +465,8 @@ const MoreInfo2 = () => {
                 {/* Buy Now */}
                 <button
                   className={`w-full py-3 rounded-md font-semibold transition ${product?._id
-                    ? "bg-[#CEBB98] text-white hover:bg-black"
-                    : "bg-gray-300 text-gray-600 cursor-not-allowed"
+                      ? "bg-[#CEBB98] text-white hover:bg-black"
+                      : "bg-gray-300 text-gray-600 cursor-not-allowed"
                     }`}
                 >
                   Inquiry Form
@@ -510,7 +541,7 @@ const MoreInfo2 = () => {
             <div className="bg-white rounded-lg shadow p-6">
               <h3 className="text-lg font-semibold text-yellow-700 mb-2">Purity</h3>
               <p className="text-sm text-gray-700">
-                {purity} {product?.defaultColor ? `(${product.defaultColor})` : ""}
+                {purity} 
               </p>
             </div>
 
@@ -543,15 +574,20 @@ const MoreInfo2 = () => {
       </div>
 
 
-      {/* RELATED PRODUCTS */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h3 className="text-xl font-semibold mb-6 text-center">Related Products</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {productsDemo.map((p) => (
-            <ProductCard key={p.id} product={p} />
-          ))}
-        </div>
-      </div>
+{/* RELATED PRODUCTS */}
+<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <h3 className="text-xl font-semibold mb-6 text-center">Related Products</h3>
+  {related.length > 0 ? (
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      {related.map((p) => (
+        <ProductCard key={p._id} product={p} />
+      ))}
+    </div>
+  ) : (
+    <p className="text-center text-gray-500">No related products found.</p>
+  )}
+</div>
+
     </>
   );
 };

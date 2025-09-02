@@ -1,5 +1,5 @@
 import express from 'express'
-import {listProducts,addProduct,removeProduct,singleProduct,updateProduct,getProductsByCategory} from '../controllers/productController.js'
+import {listProducts,addProduct,removeProduct,singleProduct,updateProduct,getProductsByCategory, getRelatedProducts} from '../controllers/productController.js'
 import { uploadColorImages } from "../middleware/cloudinaryUpload.js";
 import adminAuth from '../middleware/adminAuth.js';
 
@@ -11,5 +11,6 @@ productRouter.post('/remove', adminAuth, removeProduct)
 productRouter.post('/single', singleProduct)
 productRouter.get('/list', listProducts)
 productRouter.get('/category/:category', getProductsByCategory)
+productRouter.get("/related/:id", getRelatedProducts);
 
 export default productRouter

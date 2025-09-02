@@ -152,12 +152,105 @@ const COLOR_KEYS = [
 ];
 
 const SHAPES = [
-  "round","princess","oval","emerald","pear","marquise",
-  "heart","baguette","cushion","radiant","asscher","other"
+  "round", "princess", "oval", "emerald", "pear", "marquise",
+  "heart", "baguette", "cushion", "radiant", "asscher", "other"
 ];
 
+// ===================================================================
+// 1. DEFINED THE ColorUploader COMPONENT OUTSIDE OF THE Add COMPONENT
+// ===================================================================
+const ColorUploader = ({
+  id,
+  label,
+  dot,
+  files,
+  skuValue,
+  activeColor,
+  defaultColor,
+  onActiveChange,
+  onDefaultChange,
+  onFilesChange,
+  onFileRemove,
+  onSkuChange,
+}) => {
+  const isDefaultDisabled = files.length === 0;
+
+  return (
+    <div className="rounded-2xl border border-purple-200 p-3 bg-purple-50/40">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <label className="flex items-center gap-2">
+          <input
+            type="radio"
+            name="activeUpload"
+            checked={activeColor === id}
+            onChange={() => onActiveChange(id)}
+          />
+          <span className="flex items-center gap-2 font-medium">
+            <span className="inline-block w-3.5 h-3.5 rounded-full" style={{ background: dot }} />
+            {label}
+          </span>
+        </label>
+
+        <div className="flex items-center gap-3">
+          <label className="flex items-center gap-2 text-xs">
+            <input
+              type="radio"
+              name="defaultColor"
+              checked={defaultColor === id}
+              onChange={() => onDefaultChange(id)}
+              disabled={isDefaultDisabled}
+            />
+            Default
+          </label>
+
+          <label className={`inline-flex items-center gap-2 rounded-xl bg-white px-3 py-1.5 text-sm shadow cursor-pointer ring-1 ring-purple-100 ${activeColor !== id ? "opacity-50 cursor-not-allowed" : ""}`}>
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              disabled={activeColor !== id}
+              onChange={(e) => onFilesChange(id, e)}
+            />
+            <span className="text-[#4f1c51]">Choose Files</span>
+          </label>
+        </div>
+      </div>
+
+      <div className="mt-2">
+        <label className="text-xs text-gray-600">SKU ({label})</label>
+        <input
+          type="text"
+          value={skuValue}
+          onChange={(e) => onSkuChange(e.target.value)} // Use the passed-in handler
+          placeholder={`e.g., ${label === "Gold" ? "SKU-GLD-123" : label === "Rose Gold" ? "SKU-RGD-456" : "SKU-WGD-789"}`}
+          className="mt-1 w-full rounded-xl border px-3 py-2 focus:ring-4 focus:ring-pink-200 focus:border-[#4f1c51]"
+        />
+      </div>
+
+      {files.length > 0 && (
+        <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2">
+          {files.map((f, i) => (
+            <div key={i} className="relative border rounded-xl overflow-hidden bg-white">
+              <img src={URL.createObjectURL(f)} alt="" className="w-24 h-24 object-cover" />
+              <button
+                type="button"
+                onClick={() => onFileRemove(id, i)}
+                className="absolute top-1 right-1 bg-white/90 text-xs px-1 rounded shadow"
+              >
+                ✕
+              </button>
+              <div className="text-[10px] px-1 py-0.5 w-24 truncate">{f.name}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+
 const Add = ({ token }) => {
-  
   // BASIC FIELDS
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -166,6 +259,11 @@ const Add = ({ token }) => {
   const [category, setCategory] = useState("rings");
   const [bestseller, setBestseller] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [skuGold, setSkuGold] = useState("");
+  const [skuRose, setSkuRose] = useState("");
+  const [skuWhite, setSkuWhite] = useState("");
+  const [gstPercent, setGstPercent] = useState(3);
+  const [makingChargePerGram, setMakingChargePerGram] = useState("");
 
   // SPECS
   const [productWeight, setProductWeight] = useState("");
@@ -176,22 +274,16 @@ const Add = ({ token }) => {
   const [makingCharge, setMakingCharge] = useState("");
 
   // NEW: color uploads + carat + default
-  const [activeColor, setActiveColor] = useState("gold");     // which radio is “armed” to upload
+  const [activeColor, setActiveColor] = useState("gold");
   const [defaultColor, setDefaultColor] = useState("gold");
-
   const [goldFiles, setGoldFiles] = useState([]);
   const [roseFiles, setRoseFiles] = useState([]);
   const [whiteFiles, setWhiteFiles] = useState([]);
 
-  const [goldCarat, setGoldCarat] = useState("");   // "", "14", "18"
-  const [roseCarat, setRoseCarat] = useState("");
-  const [whiteCarat, setWhiteCarat] = useState("");
-
-  // helpers
   const getSetters = (color) => {
-    if (color === "gold") return { files: goldFiles, set: setGoldFiles, carat: goldCarat, setCarat: setGoldCarat };
-    if (color === "rose-gold") return { files: roseFiles, set: setRoseFiles, carat: roseCarat, setCarat: setRoseCarat };
-    return { files: whiteFiles, set: setWhiteFiles, carat: whiteCarat, setCarat: setWhiteCarat };
+    if (color === "gold") return { files: goldFiles, set: setGoldFiles };
+    if (color === "rose-gold") return { files: roseFiles, set: setRoseFiles };
+    return { files: whiteFiles, set: setWhiteFiles };
   };
 
   const handleColorFiles = (color, e) => {
@@ -219,52 +311,44 @@ const Add = ({ token }) => {
   const onsubmitHandler = async (e) => {
     e.preventDefault();
     try {
-      // Need at least one image overall
-      const totalCount =
-        goldFiles.length + roseFiles.length + whiteFiles.length;
+      const totalCount = goldFiles.length + roseFiles.length + whiteFiles.length;
       if (totalCount === 0) {
         toast.error("Upload at least one image (Gold / Rose Gold / White Gold)");
         return;
       }
 
-      // Default color must exist among the uploaded buckets (or we fix it)
       const firstNonEmpty =
         (goldFiles.length ? "gold" :
-        (roseFiles.length ? "rose-gold" :
-        (whiteFiles.length ? "white-gold" : null)));
+          (roseFiles.length ? "rose-gold" :
+            (whiteFiles.length ? "white-gold" : null)));
 
       const realDefault =
         (defaultColor === "gold" && goldFiles.length) ||
-        (defaultColor === "rose-gold" && roseFiles.length) ||
-        (defaultColor === "white-gold" && whiteFiles.length)
+          (defaultColor === "rose-gold" && roseFiles.length) ||
+          (defaultColor === "white-gold" && whiteFiles.length)
           ? defaultColor
           : firstNonEmpty || "gold";
 
       setLoading(true);
       const fd = new FormData();
 
-      // basics
       fd.append("name", name);
       fd.append("description", description);
       fd.append("price", price);
       fd.append("discountPrice", discountPrice || 0);
       fd.append("category", category);
       fd.append("bestseller", bestseller);
-
-      // NEW: per-color carats
-      fd.append("goldCarat", goldCarat);     // "", "14", "18"
-      fd.append("roseCarat", roseCarat);
-      fd.append("whiteCarat", whiteCarat);
-
-      // NEW: default color
+      fd.append("skuGold", skuGold);
+      fd.append("skuRose", skuRose);
+      fd.append("skuWhite", skuWhite);
+      fd.append("gstPercent", gstPercent || 0);
+      fd.append("makingChargePerGram", makingChargePerGram || 0);
       fd.append("defaultColor", realDefault);
 
-      // NEW: images – use 3 distinct fields
       goldFiles.forEach((f) => fd.append("goldImages", f));
       roseFiles.forEach((f) => fd.append("roseImages", f));
       whiteFiles.forEach((f) => fd.append("whiteImages", f));
 
-      // specs
       fd.append("productWeight", productWeight || 0);
       fd.append("goldWeight", goldWeight || 0);
       fd.append("diamondCarat", diamondCarat || 0);
@@ -277,18 +361,13 @@ const Add = ({ token }) => {
         fd,
         { headers: { token, "Content-Type": "multipart/form-data" } }
       );
-      
 
       if (data.success) {
         toast.success(data.message || "Product Added");
-        // reset
         setName(""); setDescription(""); setPrice(""); setDiscountPrice("");
         setCategory("rings"); setBestseller(false);
-
         setGoldFiles([]); setRoseFiles([]); setWhiteFiles([]);
-        setGoldCarat(""); setRoseCarat(""); setWhiteCarat("");
         setActiveColor("gold"); setDefaultColor("gold");
-
         setProductWeight(""); setGoldWeight(""); setDiamondCarat("");
         setDiamondShape("round"); setNumberOfDiamonds(""); setMakingCharge("");
       } else {
@@ -302,93 +381,6 @@ const Add = ({ token }) => {
     }
   };
 
-  const ColorUploader = ({ id, label, dot }) => {
-    const { files, setCarat } = getSetters(id);
-    const caratValue = id === "gold" ? goldCarat : id === "rose-gold" ? roseCarat : whiteCarat;
-
-    return (
-      <div className="rounded-2xl border border-purple-200 p-3 bg-purple-50/40">
-        {/* Header row: radio (enable), label, carat dropdown + default */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-          <label className="flex items-center gap-2">
-            <input
-              type="radio"
-              name="activeUpload"
-              checked={activeColor === id}
-              onChange={() => setActiveColor(id)}
-            />
-            <span className="flex items-center gap-2 font-medium">
-              <span className="inline-block w-3.5 h-3.5 rounded-full" style={{ background: dot }} />
-              {label}
-            </span>
-          </label>
-
-          <div className="flex items-center gap-3">
-            {/* carat dropdown (blank / 14 / 18) */}
-            <select
-              className="rounded-lg border px-2 py-1 text-sm"
-              value={caratValue}
-              onChange={(e) => setCarat(e.target.value)}
-            >
-              <option value="">Carat (blank)</option>
-              <option value="14">14 Carat</option>
-              <option value="18">18 Carat</option>
-            </select>
-
-            {/* default selector */}
-            <label className="flex items-center gap-2 text-xs">
-              <input
-                type="radio"
-                name="defaultColor"
-                checked={defaultColor === id}
-                onChange={() => setDefaultColor(id)}
-                disabled={
-                  (id === "gold" && !goldFiles.length) ||
-                  (id === "rose-gold" && !roseFiles.length) ||
-                  (id === "white-gold" && !whiteFiles.length)
-                }
-              />
-              Default
-            </label>
-
-            {/* choose files (enabled only when this color radio is selected) */}
-            <label className={`inline-flex items-center gap-2 rounded-xl bg-white px-3 py-1.5 text-sm shadow cursor-pointer ring-1 ring-purple-100 ${activeColor !== id ? "opacity-50 cursor-not-allowed" : ""}`}>
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                className="hidden"
-                disabled={activeColor !== id}
-                onChange={(e) => handleColorFiles(id, e)}
-              />
-              <span className="text-[#4f1c51]">Choose Files</span>
-            </label>
-          </div>
-        </div>
-
-        {/* thumbnails grid for this color */}
-        {files.length > 0 && (
-          <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2">
-            {files.map((f, i) => (
-              <div key={i} className="relative border rounded-xl overflow-hidden bg-white">
-                <img src={URL.createObjectURL(f)} alt="" className="w-24 h-24 object-cover" />
-                {/* ⛔ same remove image UX you already use */}
-                <button
-                  type="button"
-                  onClick={() => removeFile(id, i)}
-                  className="absolute top-1 right-1 bg-white/90 text-xs px-1 rounded shadow"
-                >
-                  ✕
-                </button>
-                <div className="text-[10px] px-1 py-0.5 w-24 truncate">{f.name}</div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  };
-
   return (
     <div className="w-full" style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}>
       <div className="bg-white rounded-2xl shadow ring-1 ring-purple-100 p-5">
@@ -397,11 +389,37 @@ const Add = ({ token }) => {
 
         <form onSubmit={onsubmitHandler} className="flex flex-col gap-5">
 
-          {/* === COLOR UPLOADS (3 buckets) === */}
           <section className="grid gap-3">
-            {COLOR_KEYS.map((c) => (
-              <ColorUploader key={c.id} id={c.id} label={c.label} dot={c.dot} />
-            ))}
+            {/* =================================================================== */}
+            {/* 2. PASSING ALL REQUIRED DATA AND FUNCTIONS AS PROPS */}
+            {/* =================================================================== */}
+            {COLOR_KEYS.map((c) => {
+              const { files } = getSetters(c.id);
+              const skuValue = c.id === 'gold' ? skuGold : c.id === 'rose-gold' ? skuRose : skuWhite;
+              const onSkuChange = (value) => {
+                if (c.id === 'gold') setSkuGold(value);
+                else if (c.id === 'rose-gold') setSkuRose(value);
+                else setSkuWhite(value);
+              };
+
+              return (
+                <ColorUploader
+                  key={c.id}
+                  id={c.id}
+                  label={c.label}
+                  dot={c.dot}
+                  files={files}
+                  skuValue={skuValue}
+                  activeColor={activeColor}
+                  defaultColor={defaultColor}
+                  onActiveChange={setActiveColor}
+                  onDefaultChange={setDefaultColor}
+                  onFilesChange={handleColorFiles}
+                  onFileRemove={removeFile}
+                  onSkuChange={onSkuChange}
+                />
+              );
+            })}
           </section>
 
           {/* === BASICS === */}
@@ -409,12 +427,12 @@ const Add = ({ token }) => {
             <div>
               <label className="block text-sm text-gray-700 mb-1.5">Product name</label>
               <input className="w-full rounded-xl border px-3 py-2.5 focus:ring-4 focus:ring-pink-200 focus:border-[#4f1c51]"
-                     value={name} onChange={e => setName(e.target.value)} placeholder="Diamond Band Ring" required/>
+                value={name} onChange={e => setName(e.target.value)} placeholder="Diamond Band Ring" required />
             </div>
             <div>
               <label className="block text-sm text-gray-700 mb-1.5">Category</label>
               <select className="w-full rounded-xl border px-3 py-2.5 focus:ring-4 focus:ring-pink-200 focus:border-[#4f1c51]"
-                      value={category} onChange={e => setCategory(e.target.value)}>
+                value={category} onChange={e => setCategory(e.target.value)}>
                 <option value="rings">Rings</option>
                 <option value="earrings">Earrings</option>
                 <option value="bracelet">Bracelet</option>
@@ -425,12 +443,12 @@ const Add = ({ token }) => {
             <div>
               <label className="block text-sm text-gray-700 mb-1.5">Price (₹)</label>
               <input type="number" min="0" className="w-full rounded-xl border px-3 py-2.5 focus:ring-4 focus:ring-pink-200 focus:border-[#4f1c51]"
-                     value={price} onChange={e => setPrice(e.target.value)} placeholder="28284" required/>
+                value={price} onChange={e => setPrice(e.target.value)} placeholder="28284" required />
             </div>
             <div>
               <label className="block text-sm text-gray-700 mb-1.5">Discount Price (₹)</label>
               <input type="number" min="0" className="w-full rounded-xl border px-3 py-2.5 focus:ring-4 focus:ring-pink-200 focus:border-[#4f1c51]"
-                     value={discountPrice} onChange={e => setDiscountPrice(e.target.value)} placeholder="25000"/>
+                value={discountPrice} onChange={e => setDiscountPrice(e.target.value)} placeholder="25000" />
             </div>
           </section>
 
@@ -438,7 +456,7 @@ const Add = ({ token }) => {
           <section>
             <label className="block text-sm text-gray-700 mb-1.5">Product description</label>
             <textarea rows={4} className="w-full rounded-xl border px-3 py-2.5 focus:ring-4 focus:ring-pink-200 focus:border-[#4f1c51]"
-                      value={description} onChange={e => setDescription(e.target.value)} placeholder="Enhance your elegance…" required/>
+              value={description} onChange={e => setDescription(e.target.value)} placeholder="Enhance your elegance…" required />
           </section>
 
           {/* SPECS */}
@@ -448,37 +466,69 @@ const Add = ({ token }) => {
               <div>
                 <p className="text-xs text-gray-600 mb-1">Product weight (g)</p>
                 <input type="number" min="0" step="0.01" value={productWeight} onChange={e => setProductWeight(e.target.value)}
-                       className="w-full rounded-xl border px-3 py-2.5 focus:ring-4 focus:ring-pink-200 focus:border-[#4f1c51]" />
+                  className="w-full rounded-xl border px-3 py-2.5 focus:ring-4 focus:ring-pink-200 focus:border-[#4f1c51]" />
               </div>
               <div>
                 <p className="text-xs text-gray-600 mb-1">Gold weight (g)</p>
                 <input type="number" min="0" step="0.01" value={goldWeight} onChange={e => setGoldWeight(e.target.value)}
-                       className="w-full rounded-xl border px-3 py-2.5 focus:ring-4 focus:ring-pink-200 focus:border-[#4f1c51]" />
+                  className="w-full rounded-xl border px-3 py-2.5 focus:ring-4 focus:ring-pink-200 focus:border-[#4f1c51]" />
               </div>
               <div>
                 <p className="text-xs text-gray-600 mb-1">Diamond carat (ct)</p>
                 <input type="number" min="0" step="0.01" value={diamondCarat} onChange={e => setDiamondCarat(e.target.value)}
-                       className="w-full rounded-xl border px-3 py-2.5 focus:ring-4 focus:ring-pink-200 focus:border-[#4f1c51]" />
+                  className="w-full rounded-xl border px-3 py-2.5 focus:ring-4 focus:ring-pink-200 focus:border-[#4f1c51]" />
               </div>
               <div>
                 <p className="text-xs text-gray-600 mb-1">Diamond shape</p>
                 <select value={diamondShape} onChange={e => setDiamondShape(e.target.value)}
-                        className="w-full rounded-xl border px-3 py-2.5 focus:ring-4 focus:ring-pink-200 focus:border-[#4f1c51]">
+                  className="w-full rounded-xl border px-3 py-2.5 focus:ring-4 focus:ring-pink-200 focus:border-[#4f1c51]">
                   {SHAPES.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
               </div>
               <div>
                 <p className="text-xs text-gray-600 mb-1">No. of diamonds</p>
                 <input type="number" min="0" value={numberOfDiamonds} onChange={e => setNumberOfDiamonds(e.target.value)}
-                       className="w-full rounded-xl border px-3 py-2.5 focus:ring-4 focus:ring-pink-200 focus:border-[#4f1c51]" />
+                  className="w-full rounded-xl border px-3 py-2.5 focus:ring-4 focus:ring-pink-200 focus:border-[#4f1c51]" />
               </div>
               <div>
                 <p className="text-xs text-gray-600 mb-1">Making charge (₹)</p>
                 <input type="number" min="0" value={makingCharge} onChange={e => setMakingCharge(e.target.value)}
-                       className="w-full rounded-xl border px-3 py-2.5 focus:ring-4 focus:ring-pink-200 focus:border-[#4f1c51]" />
+                  className="w-full rounded-xl border px-3 py-2.5 focus:ring-4 focus:ring-pink-200 focus:border-[#4f1c51]" />
               </div>
             </div>
           </section>
+
+          {/* === PRICING CONTROLS (Admin) === */}
+          <section className="grid sm:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm text-gray-700 mb-1.5">GST (%)</label>
+              <input
+                type="number"
+                min="0"
+                step="0.1"
+                value={gstPercent}
+                onChange={(e) => setGstPercent(e.target.value)}
+                className="w-full rounded-xl border px-3 py-2.5 focus:ring-4 focus:ring-pink-200 focus:border-[#4f1c51]"
+                placeholder="3"
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="block text-sm text-gray-700 mb-1.5">Making Charge per gram (₹/g)</label>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={makingChargePerGram}
+                onChange={(e) => setMakingChargePerGram(e.target.value)}
+                className="w-full rounded-xl border px-3 py-2.5 focus:ring-4 focus:ring-pink-200 focus:border-[#4f1c51]"
+                placeholder="e.g., 700"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Used with Net Gold Weight (specs.goldWeight) to compute making charges.
+              </p>
+            </div>
+          </section>
+
 
           <label className="inline-flex items-center gap-2 text-sm">
             <input type="checkbox" checked={bestseller} onChange={() => setBestseller(p => !p)} />
@@ -486,7 +536,7 @@ const Add = ({ token }) => {
           </label>
 
           <button type="submit" disabled={loading}
-                  className="self-start rounded-xl bg-[#4f1c51] text-white px-6 py-2.5 shadow hover:shadow-md disabled:opacity-60">
+            className="self-start rounded-xl bg-[#4f1c51] text-white px-6 py-2.5 shadow hover:shadow-md disabled:opacity-60">
             {loading ? "Adding…" : "Add Product"}
           </button>
         </form>

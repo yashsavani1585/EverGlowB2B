@@ -11,6 +11,7 @@ import orderRouter from './routes/orderRoute.js'
 import session from "express-session";
 import authRoutes from "./routes/auth.routes.js";
 import formsRouter from "./routes/forms.routes.js";
+import pricingRouter from "./routes/pricingRoutes.js";
 
 // App Config
 const app = express()
@@ -41,6 +42,7 @@ app.use('/api/order', orderRouter)
 app.use("/api/auth", authRoutes);
 app.use("/api/wishlist", wishlistRouter);
 app.use("/api/forms", formsRouter);
+app.use("/api/pricing", pricingRouter);
 
 
 app.get('/',(req,res)=>{

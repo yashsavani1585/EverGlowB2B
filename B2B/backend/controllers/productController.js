@@ -36,7 +36,7 @@ const addProduct = async (req, res) => {
   console.log(req.body)
   console.log(req.files)
   try {
-    const { name, description, price, discountPrice, category, bestseller } = req.body;
+    const { name, description, price, discountPrice, category, bestseller, productWeight, goldWeight, diamondCarat, diamondShape, numberOfDiamonds, makingCharge, gstPercent, makingChargePerGram, skuGold, skuRose, skuWhite} = req.body;
     if (!name || !description || !price || !category) {
       return res.json({ success: false, message: "Missing required fields" });
     }
@@ -54,11 +54,11 @@ const addProduct = async (req, res) => {
     }
 
     // carats per color (string: "", "14", "18")
-    const caratByColor = {
-      gold: String(req.body.goldCarat ?? ""),
-      "rose-gold": String(req.body.roseCarat ?? ""),
-      "white-gold": String(req.body.whiteCarat ?? ""),
-    };
+    // const caratByColor = {
+    //   gold: String(req.body.goldCarat ?? ""),
+    //   "rose-gold": String(req.body.roseCarat ?? ""),
+    //   "white-gold": String(req.body.whiteCarat ?? ""),
+    // };
 
     // defaultColor
     const defRaw = String(req.body.defaultColor || "").toLowerCase();
@@ -98,7 +98,14 @@ const addProduct = async (req, res) => {
         "rose-gold": imagesRose,
         "white-gold": imagesWhite,
       },
-      caratByColor,
+           skuByColor: {
+        gold: (skuGold || "").trim(),
+        "rose-gold": (skuRose || "").trim(),
+        "white-gold": (skuWhite || "").trim(),
+      },
+        gstPercent: Number(gstPercent ?? 3),
+      makingChargePerGram: Number(makingChargePerGram || 0),
+      // caratByColor,
       defaultColor,
       specs,
       date: Date.now(),
@@ -251,6 +258,24 @@ const getProductsByCategory = async (req, res) => {
   }
 };
 
+const getRelatedProducts = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const current = await productModel.findById(id);
+    if (!current) return res.json({ success: false, message: "Product not found" });
+
+    // fetch products in same category, exclude current
+    const related = await productModel.find({
+      category: current.category,
+      _id: { $ne: id }
+    }).limit(6);
+
+    res.json({ success: true, products: related });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 export {
   listProducts,
   addProduct,
@@ -258,4 +283,5 @@ export {
   singleProduct,
   updateProduct,
   getProductsByCategory,
+  getRelatedProducts
 };
