@@ -118,7 +118,7 @@ const Wishlist = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
       {/* EXAMPLE GRID — replace inner card markup with your current UI (classes can stay exactly as you have) */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1  md:grid-cols-3 lg:grid-cols-4 gap-6">
         {viewRows.map((row) => (
           <div key={row.key} className="border rounded-2xl overflow-hidden shadow-sm bg-white">
             <div className="relative">
