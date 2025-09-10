@@ -643,134 +643,383 @@
 
 // export default TestimonialSection;
 
-import React, { useState, useEffect } from "react";
+// import React, { useState, useEffect } from "react";
+// import leftImg from "../../assets/testimonial-left.png";
+// import rightImg from "../../assets/testimonial-right.png";
+
+// const reviews = [
+//   "The design is elegant and build quality feels really sturdy!",
+//   "The service was quick and the packaging came neat and safe!",
+//   "The quality is top-notch and delivery was super fast. Loved it!"
+// ];
+
+// const TestimonialSection = () => {
+//   const [currentReview, setCurrentReview] = useState(0);
+
+//   useEffect(() => {
+//     const interval = setInterval(() => {
+//       setCurrentReview((prev) => (prev + 1) % reviews.length);
+//     }, 4000);
+//     return () => clearInterval(interval);
+//   }, []);
+
+//   return (
+//     <>
+//       <div className="text-center pt-1 pb-2 bg-white">
+//         <h1
+//           className="text-4xl md:text-5xl font-bold text-black"
+//           style={{ fontFamily: "'Garamond', 'Times New Roman', serif" }}
+//         >
+//           Customer Testimonials
+//         </h1>
+//         <p className="text-lg md:text-xl mt-2 font-bold text-gray-600">
+//           See what our clients have to say
+//         </p>
+//       </div>
+
+//       {/* ↓↓↓ shorter height on < lg; full screen on lg+ ↓↓↓ */}
+//       <section className="relative flex flex-col items-center justify-center min-h-[50vh] sm:min-h-[76vh] md:min-h-[84vh] lg:min-h-screen w-full p-1 sm:p-8 lg:p-12 overflow-hidden bg-[#CEBB98] font-['Inter']">
+
+//         {/* ==== GRID LINES (only desktop) ==== */}
+//         <div className="hidden lg:block absolute top-[20%] left-0 h-px w-[90%] bg-black"></div>
+//         <div className="hidden lg:block absolute bottom-[20%] left-0 h-px w-full bg-black"></div>
+//         <div className="hidden lg:block absolute top-36 left-[22%] w-px h-full bg-black"></div>
+//         <div className="hidden lg:block absolute bottom-36 right-[22%] w-px h-full bg-black"></div>
+
+//         {/* ==== Decorative Stars ==== */}
+//         <svg
+//           className="absolute top-8 left-8 w-12 h-12 text-white sm:w-16 sm:h-16"
+//           viewBox="0 0 24 24"
+//           fill="none"
+//           stroke="currentColor"
+//           strokeWidth="1"
+//         >
+//           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+//         </svg>
+
+//         <svg
+//           className="absolute bottom-16 right-16 w-8 h-8 text-white sm:w-12 sm:h-12"
+//           viewBox="0 0 24 24"
+//           fill="none"
+//           stroke="currentColor"
+//           strokeWidth="1"
+//         >
+//           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+//         </svg>
+
+//         {/* ==== Main Content ==== */}
+//         <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 sm:px-6 py-10 sm:py-16 w-full">
+
+//           {/* ==== MOBILE/TABLET LAYOUT ==== */}
+//           <div className="flex flex-col items-center gap-6 lg:hidden">
+//             <img
+//               src={leftImg}
+//               alt="Customer Left"
+//               className="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-md shadow-2xl border-2 border-white"
+//             />
+
+//             <blockquote className="max-w-2xl px-4">
+//               <p className="text-white text-lg sm:text-xl md:text-2xl font-serif leading-relaxed font-semibold">
+//                 {reviews[currentReview]}
+//               </p>
+//             </blockquote>
+
+//             <img
+//               src={rightImg}
+//               alt="Customer Right"
+//               className="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-md shadow-2xl border-2 border-white"
+//             />
+//           </div>
+
+//           {/* ==== DESKTOP QUOTE ==== */}
+//           <blockquote className="hidden lg:block max-w-3xl px-6">
+//             <p className="text-white text-2xl md:text-3xl lg:text-4xl font-serif leading-relaxed font-semibold">
+//               {reviews[currentReview]}
+//             </p>
+//           </blockquote>
+
+//           {/* ==== DESKTOP FLOATING IMAGES ==== */}
+//           <div className="hidden lg:block">
+//             {/* Left Image */}
+//             <div className="absolute left-[20%] -bottom-[55%] translate-x-[-50%]">
+//               <img
+//                 src={leftImg}
+//                 alt="Customer Left"
+//                 className="w-28 h-28 lg:w-36 lg:h-36 object-cover rounded-md shadow-2xl border-2 border-white"
+//               />
+//             </div>
+//             {/* Right Image */}
+//             <div className="absolute right-[20%] -top-[55%] translate-x-[50%]">
+//               <img
+//                 src={rightImg}
+//                 alt="Customer Right"
+//                 className="w-28 h-28 lg:w-36 lg:h-36 object-cover rounded-md shadow-2xl border-2 border-white"
+//               />
+//             </div>
+//           </div>
+
+//           {/* ==== DOTS ==== */}
+//           <div className="flex gap-2 justify-center mt-6">
+//             {reviews.map((_, index) => (
+//               <span
+//                 key={index}
+//                 className={`w-2 h-2 rounded-full ${
+//                   currentReview === index ? "bg-white" : "bg-white opacity-50"
+//                 }`}
+//               ></span>
+//             ))}
+//           </div>
+//         </div>
+//       </section>
+//     </>
+//   );
+// };
+
+// export default TestimonialSection;
+
+// import React, { useState, useEffect } from "react";
+// import leftImg from "../../assets/testimonial-left.png";
+// import rightImg from "../../assets/testimonial-right.png";
+
+// const reviews = [
+//   "The design is elegant and build quality feels really sturdy!",
+//   "The service was quick and the packaging came neat and safe!",
+//   "The quality is top-notch and delivery was super fast. Loved it!"
+// ];
+
+// const TestimonialSection = () => {
+//   const [currentReview, setCurrentReview] = useState(0);
+
+//   // Auto switch reviews every 5s
+//   useEffect(() => {
+//     const interval = setInterval(() => {
+//       setCurrentReview((prev) => (prev + 1) % reviews.length);
+//     }, 5000);
+//     return () => clearInterval(interval);
+//   }, []);
+
+//   return (
+//     <>
+//       {/* Heading */}
+//       <div className="text-center pt-6 pb-4 bg-white">
+//         <h1
+//           className="text-3xl sm:text-4xl lg:text-5xl font-bold text-black"
+//           style={{ fontFamily: "'Garamond', 'Times New Roman', serif" }}
+//         >
+//           Customer Testimonials
+//         </h1>
+//         <p className="text-base sm:text-lg md:text-xl mt-2 font-semibold text-gray-600">
+//           See what our clients have to say
+//         </p>
+//       </div>
+
+//       {/* Main Section */}
+//       <section className="relative flex flex-col items-center justify-center min-h-[60vh] sm:min-h-[75vh] lg:min-h-screen w-full px-4 sm:px-8 lg:px-12 overflow-hidden bg-[#CEBB98] font-['Inter']">
+
+//         {/* Background Grid Lines (desktop only) */}
+//         <div className="hidden lg:block absolute top-[25%] left-0 h-px w-full bg-black opacity-40"></div>
+//         <div className="hidden lg:block absolute bottom-[25%] left-0 h-px w-full bg-black opacity-40"></div>
+//         <div className="hidden lg:block absolute top-0 left-[22%] w-px h-full bg-black opacity-40"></div>
+//         <div className="hidden lg:block absolute top-0 right-[22%] w-px h-full bg-black opacity-40"></div>
+
+//         {/* Decorative Stars */}
+//         <svg
+//           className="absolute top-8 left-8 w-10 h-10 text-white sm:w-12 sm:h-12"
+//           viewBox="0 0 24 24"
+//           fill="none"
+//           stroke="currentColor"
+//           strokeWidth="1.2"
+//         >
+//           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 
+//             18.18 21.02 12 17.77 5.82 21.02 7 
+//             14.14 2 9.27 8.91 8.26 12 2" />
+//         </svg>
+
+//         <svg
+//           className="absolute bottom-12 right-12 w-8 h-8 text-white sm:w-10 sm:h-10"
+//           viewBox="0 0 24 24"
+//           fill="none"
+//           stroke="currentColor"
+//           strokeWidth="1.2"
+//         >
+//           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 
+//             18.18 21.02 12 17.77 5.82 21.02 7 
+//             14.14 2 9.27 8.91 8.26 12 2" />
+//         </svg>
+
+//         {/* Content */}
+//         <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 sm:px-8 py-10 sm:py-16 w-full">
+
+//           {/* MOBILE/TABLET Layout */}
+//           <div className="flex flex-col items-center gap-6 lg:hidden">
+//             <img
+//               src={leftImg}
+//               alt="Customer Left"
+//               className="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-md shadow-xl border-2 border-white"
+//             />
+
+//             <blockquote className="max-w-xl px-4">
+//               <p className="text-white text-lg sm:text-xl md:text-2xl font-serif leading-relaxed font-semibold transition-all duration-700">
+//                 {reviews[currentReview]}
+//               </p>
+//             </blockquote>
+
+//             <img
+//               src={rightImg}
+//               alt="Customer Right"
+//               className="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-md shadow-xl border-2 border-white"
+//             />
+//           </div>
+
+//           {/* DESKTOP QUOTE */}
+//           <blockquote className="hidden lg:block max-w-3xl px-6">
+//             <p className="text-white text-2xl md:text-3xl lg:text-4xl font-serif leading-relaxed font-semibold transition-all duration-700">
+//               {reviews[currentReview]}
+//             </p>
+//           </blockquote>
+
+//           {/* DESKTOP Floating Images */}
+//           <div className="hidden lg:block">
+//             {/* Left Image */}
+//             <div className="absolute left-[18%] bottom-[10%]">
+//               <img
+//                 src={leftImg}
+//                 alt="Customer Left"
+//                 className="w-32 h-32 lg:w-40 lg:h-40 object-cover rounded-md shadow-2xl border-2 border-white"
+//               />
+//             </div>
+//             {/* Right Image */}
+//             <div className="absolute right-[18%] top-[10%]">
+//               <img
+//                 src={rightImg}
+//                 alt="Customer Right"
+//                 className="w-32 h-32 lg:w-40 lg:h-40 object-cover rounded-md shadow-2xl border-2 border-white"
+//               />
+//             </div>
+//           </div>
+
+//           {/* Dots Navigation */}
+//           <div className="flex gap-2 justify-center mt-8">
+//             {reviews.map((_, index) => (
+//               <button
+//                 key={index}
+//                 onClick={() => setCurrentReview(index)}
+//                 className={`w-3 h-3 rounded-full transition-all duration-300 ${
+//                   currentReview === index ? "bg-white" : "bg-white/50"
+//                 }`}
+//               ></button>
+//             ))}
+//           </div>
+//         </div>
+//       </section>
+//     </>
+//   );
+// };
+
+// export default TestimonialSection;
+
+import React from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Pagination } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/pagination";
 import leftImg from "../../assets/testimonial-left.png";
 import rightImg from "../../assets/testimonial-right.png";
 
 const reviews = [
-  "The design is elegant and build quality feels really sturdy!",
-  "The service was quick and the packaging came neat and safe!",
-  "The quality is top-notch and delivery was super fast. Loved it!"
+  { text: "The design is elegant and build quality feels really sturdy!", author: "Ravi Sharma", role: "Product Designer", img: leftImg },
+  { text: "The service was quick and the packaging came neat and safe!", author: "Ananya Gupta", role: "Entrepreneur", img: rightImg },
+  { text: "The quality is top-notch and delivery was super fast. Loved it!", author: "Vikram Patel", role: "Software Engineer", img: leftImg },
+  { text: "Amazing customer support, really happy with the purchase.", author: "Sneha Verma", role: "Startup Founder", img: rightImg },
+  { text: "Delivery was faster than expected, packaging was perfect.", author: "Karan Mehta", role: "Freelancer", img: leftImg },
+  { text: "I’ve never had such a smooth shopping experience online.", author: "Priya Iyer", role: "Marketing Manager", img: rightImg },
+  { text: "Top-notch quality at affordable price. Recommended!", author: "Arjun Singh", role: "Consultant", img: leftImg },
+  { text: "The attention to detail is simply amazing. 5 stars!", author: "Neha Kapoor", role: "Fashion Blogger", img: rightImg },
+  { text: "Website was super easy to use, checkout was smooth.", author: "Rahul Nair", role: "Data Analyst", img: leftImg },
+  { text: "Products are authentic and worth the price!", author: "Aditi Joshi", role: "Interior Designer", img: rightImg },
 ];
 
 const TestimonialSection = () => {
-  const [currentReview, setCurrentReview] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentReview((prev) => (prev + 1) % reviews.length);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, []);
-
   return (
     <>
-      <div className="text-center pt-1 pb-2 bg-white">
+      {/* Heading */}
+      <div className="text-center mb-10">
         <h1
-          className="text-4xl md:text-5xl font-bold text-black"
+          className="text-3xl sm:text-4xl lg:text-5xl font-bold text-black"
           style={{ fontFamily: "'Garamond', 'Times New Roman', serif" }}
         >
           Customer Testimonials
         </h1>
-        <p className="text-lg md:text-xl mt-2 font-bold text-gray-600">
+        <p className="text-base sm:text-lg md:text-xl mt-3 font-medium text-black/90">
           See what our clients have to say
         </p>
       </div>
+      <section className="relative flex flex-col items-center justify-center min-h-[30vh] w-full px-6 py-16 bg-gradient-to-br from-[#CEBB98] to-[#b9a476] font-['Inter'] overflow-hidden">
 
-      {/* ↓↓↓ shorter height on < lg; full screen on lg+ ↓↓↓ */}
-      <section className="relative flex flex-col items-center justify-center min-h-[50vh] sm:min-h-[76vh] md:min-h-[84vh] lg:min-h-screen w-full p-1 sm:p-8 lg:p-12 overflow-hidden bg-[#CEBB98] font-['Inter']">
 
-        {/* ==== GRID LINES (only desktop) ==== */}
-        <div className="hidden lg:block absolute top-[20%] left-0 h-px w-[90%] bg-black"></div>
-        <div className="hidden lg:block absolute bottom-[20%] left-0 h-px w-full bg-black"></div>
-        <div className="hidden lg:block absolute top-36 left-[22%] w-px h-full bg-black"></div>
-        <div className="hidden lg:block absolute bottom-36 right-[22%] w-px h-full bg-black"></div>
 
-        {/* ==== Decorative Stars ==== */}
-        <svg
-          className="absolute top-8 left-8 w-12 h-12 text-white sm:w-16 sm:h-16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1"
-        >
-          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-        </svg>
+        {/* Swiper Slider */}
+        <Swiper
+          modules={[Autoplay, Pagination]}
+          autoplay={{ delay: 4000, disableOnInteraction: false }}
+          pagination={{ clickable: true }}
+          spaceBetween={30}
+          breakpoints={{
+            0: { slidesPerView: 1 },     // Mobile small (default)
+            480: { slidesPerView: 1 },   // Mobile large
+            640: { slidesPerView: 2 },   // Small tablets
+            768: { slidesPerView: 2 },   // Tablets
+            1024: { slidesPerView: 3 },  // Laptops
+            1280: { slidesPerView: 4 },  // Desktops
+            1536: { slidesPerView: 4 },  // Large screens
+          }}
+            className="w-full max-w-6xl pb-16" // padding-bottom for dots space
+            >
+            {
+              reviews.map((review, index) => (
+                <SwiperSlide key={index}>
+                  <div className="bg-white/10 backdrop-blur-lg rounded-xl shadow-md p-6 text-center hover:scale-105 transition-transform duration-300 w-full h-[260px] flex flex-col justify-between">
+                    <p className="text-base text-white font-serif leading-relaxed mb-4 line-clamp-3">
+                      "{review.text}"
+                    </p>
+                    <div className="flex flex-col items-center">
+                      <img
+                        src={review.img}
+                        alt={review.author}
+                        className="w-14 h-14 object-cover rounded-full shadow-md border-2 border-white mb-2"
+                      />
+                      <h3 className="text-white text-sm font-semibold">
+                        {review.author}
+                      </h3>
+                      <p className="text-white/70 text-xs">{review.role}</p>
+                    </div>
+                  </div>
+                </SwiperSlide>
+              ))
+            }
+      </Swiper>
 
-        <svg
-          className="absolute bottom-16 right-16 w-8 h-8 text-white sm:w-12 sm:h-12"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1"
-        >
-          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-        </svg>
-
-        {/* ==== Main Content ==== */}
-        <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 sm:px-6 py-10 sm:py-16 w-full">
-
-          {/* ==== MOBILE/TABLET LAYOUT ==== */}
-          <div className="flex flex-col items-center gap-6 lg:hidden">
-            <img
-              src={leftImg}
-              alt="Customer Left"
-              className="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-md shadow-2xl border-2 border-white"
-            />
-
-            <blockquote className="max-w-2xl px-4">
-              <p className="text-white text-lg sm:text-xl md:text-2xl font-serif leading-relaxed font-semibold">
-                {reviews[currentReview]}
-              </p>
-            </blockquote>
-
-            <img
-              src={rightImg}
-              alt="Customer Right"
-              className="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-md shadow-2xl border-2 border-white"
-            />
-          </div>
-
-          {/* ==== DESKTOP QUOTE ==== */}
-          <blockquote className="hidden lg:block max-w-3xl px-6">
-            <p className="text-white text-2xl md:text-3xl lg:text-4xl font-serif leading-relaxed font-semibold">
-              {reviews[currentReview]}
-            </p>
-          </blockquote>
-
-          {/* ==== DESKTOP FLOATING IMAGES ==== */}
-          <div className="hidden lg:block">
-            {/* Left Image */}
-            <div className="absolute left-[20%] -bottom-[55%] translate-x-[-50%]">
-              <img
-                src={leftImg}
-                alt="Customer Left"
-                className="w-28 h-28 lg:w-36 lg:h-36 object-cover rounded-md shadow-2xl border-2 border-white"
-              />
-            </div>
-            {/* Right Image */}
-            <div className="absolute right-[20%] -top-[55%] translate-x-[50%]">
-              <img
-                src={rightImg}
-                alt="Customer Right"
-                className="w-28 h-28 lg:w-36 lg:h-36 object-cover rounded-md shadow-2xl border-2 border-white"
-              />
-            </div>
-          </div>
-
-          {/* ==== DOTS ==== */}
-          <div className="flex gap-2 justify-center mt-6">
-            {reviews.map((_, index) => (
-              <span
-                key={index}
-                className={`w-2 h-2 rounded-full ${
-                  currentReview === index ? "bg-white" : "bg-white opacity-50"
-                }`}
-              ></span>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Custom Swiper pagination styling */}
+      <style>
+        {`
+    .swiper-pagination {
+      position: static !important;   /* default absolute ko override kiya */
+      margin-top: 20px;             /* cards ke neeche gap */
+      text-align: center;           /* center me dots */
+    }
+    .swiper-pagination-bullet {
+      background: black !important;
+      opacity: 0.6;
+      width: 10px;
+      height: 10px;
+      margin: 0 6px !important;     /* thoda space between dots */
+    }
+    .swiper-pagination-bullet-active {
+      opacity: 1;
+    }
+  `}
+      </style>
+    </section >
     </>
   );
 };

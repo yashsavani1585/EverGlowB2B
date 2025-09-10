@@ -51,11 +51,11 @@ const Wishlist = () => {
   }, [wishlist]);
 
   // ——— handlers (plug into your existing buttons, no UI change) ———
-  const handleAddToCart = async (row) => {
-    if (!isAuthenticated()) return navigate("/auth");
-    await add(row.product._id, 1, row.color);  // your CartContext add()
-    await wishRemove(row.product._id, row.color); // remove from wishlist
-  };
+  // const handleAddToCart = async (row) => {
+  //   if (!isAuthenticated()) return navigate("/auth");
+  //   await add(row.product._id, 1, row.color);  // your CartContext add()
+  //   await wishRemove(row.product._id, row.color); // remove from wishlist
+  // };
 
   const handleRemove = async (row) => {
     if (!isAuthenticated()) return navigate("/auth");
@@ -147,14 +147,14 @@ const Wishlist = () => {
               {/* Buttons — wire them to handlers; keep your existing styling */}
               <div className="mt-3 flex gap-2">
                 <button
-                  onClick={() => handleAddToCart(row)}
-                  className="flex-1 bg-[#4F1c51] text-white py-2 rounded-md text-sm font-medium"
+                    onClick={() => navigate('/inquiry')}
+                  className="w-full  border border-[#CEBB98] text-black text-sm font-medium py-2 px-3 rounded-xl hover:bg-[#CEBB98] transition"
                 >
-                  Add to Cart
+                   Inquiry Form
                 </button>
                 <button
                   onClick={() => handleRemove(row)}
-                  className="flex-1 border border-gray-300 py-2 rounded-md text-sm font-medium"
+                  className="w-full  border border-[#CEBB98] text-black text-sm font-medium py-2 px-3 rounded-xl hover:bg-[#CEBB98] transition"
                 >
                   Remove
                 </button>

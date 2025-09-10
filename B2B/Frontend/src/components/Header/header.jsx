@@ -1179,6 +1179,259 @@
 
 // export default Header;
 
+// import React, { useState, useRef, useEffect } from "react";
+// import {
+//   FaHeart,
+//   FaShoppingCart,
+//   FaSearch,
+//   FaUser,
+//   FaBars,
+// } from "react-icons/fa";
+// import { Drawer } from "@mui/material";
+// import Logo from "../Logo/Logo";
+// import NavBar from "../NavBar/NavBar";
+// import { Link, useNavigate } from "react-router-dom";
+// import SearchOverlay from "../SearchOverlay/SearchOverlay";
+// import { logout } from "../../utils/auth";
+// import {useCart} from "../../context/cartContext";
+
+// const Header = () => {
+//   const [accountOpen, setAccountOpen] = useState(false);
+//   const [drawerOpen, setDrawerOpen] = useState(false);
+//   const [isAuthenticated, setIsAuthenticated] = useState(true);
+
+//   const [searchOpen, setSearchOpen] = useState(false);
+//   const [searchQuery, setSearchQuery] = useState(""); // controlled search
+
+//   const accountRef = useRef(null);
+//   const searchRef = useRef(null);
+//   const { count, wishCount, clear, clearWishlist} = useCart();
+//   const navigate = useNavigate();
+
+//   // dummy counts (backend se laa sakte ho)
+//   const wishlistCount = 2;
+//   const cartCount = 3;
+
+//   useEffect(() => {
+//     const handler = (e) => {
+//       if (accountRef.current && !accountRef.current.contains(e.target)) {
+//         setAccountOpen(false);
+//       }
+//     };
+//     document.addEventListener("mousedown", handler);
+//     const onAuth = () => setIsAuthenticated(!!localStorage.getItem("token"));
+//     window.addEventListener("auth-change", onAuth);
+//     window.addEventListener("storage", onAuth); // cross-tab
+//     return () => {
+//       document.removeEventListener("mousedown", handler);
+//       window.removeEventListener("auth-change", onAuth);
+//       window.removeEventListener("storage", onAuth);
+//     };
+//   }, []);
+
+//   const handleLinkClick = () => {
+//     setDrawerOpen(false);
+//     setAccountOpen(false);
+//   };
+
+//   return (
+//     <>
+//       <header className="w-full bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+//         <div className="max-w-7xl mx-auto flex items-center justify-between px-3 py-2">
+//           {/* Left: Logo */}
+//           <div className="flex items-center">
+//             <Link to="/" className="block w-20 md:w-auto">
+//               <Logo />
+//             </Link>
+//           </div>
+
+//           {/* Search Bar */}
+//           <div
+//             className="flex flex-1 justify-center px-2 md:px-4 relative"
+//             ref={searchRef}
+//           >
+//             <div
+//               className="flex items-center w-full
+//                 max-w-[140px] h-7
+//                 sm:max-w-[200px] sm:h-8
+//                 md:max-w-md md:h-10
+//                 lg:max-w-xl lg:h-12
+//                 border border-black rounded-lg
+//                 overflow-hidden bg-white cursor-text"
+//             >
+//               <input
+//                 type="text"
+//                 value={searchQuery}
+//                 onFocus={() => setSearchOpen(true)}
+//                 onChange={(e) => {
+//                   setSearchQuery(e.target.value);
+//                   setSearchOpen(true);
+//                 }}
+//                 placeholder="Search..."
+//                 className="flex-grow outline-none text-black placeholder-[#CEBB98]
+//                            text-[11px] sm:text-xs md:text-sm lg:text-base px-2"
+//               />
+//               <button
+//                 className="flex items-center justify-center px-2
+//                            text-black hover:text-yellow-900 transition-colors
+//                            bg-transparent border-none"
+//               >
+//                 <FaSearch className="text-xs sm:text-sm md:text-base" />
+//               </button>
+//             </div>
+
+//             {/* Search Dropdown Overlay */}
+//             <SearchOverlay
+//               open={searchOpen}
+//               onClose={() => setSearchOpen(false)}
+//               anchorRef={searchRef}
+//               query={searchQuery}
+//               setQuery={setSearchQuery}
+//             />
+//           </div>
+
+//           {/* Right: Account + Drawer */}
+//           <div className="flex items-center space-x-4 text-[#CEBB98]">
+//             <div className="hidden md:flex items-center space-x-5">
+//               {/* Wishlist with Badge */}
+//               <Link to="/wishlist" className="relative">
+//                 <div className="flex flex-col items-center cursor-pointer hover:text-black transition-colors">
+//                   <FaHeart className="text-xl" />
+//                   {wishCount > 0 && (
+//                     <span className="absolute -top-0 -right-0 bg-yellow-900 text-white text-[10px] px-1.5 rounded-full">
+//                       {wishCount}
+//                     </span>
+//                   )}
+//                   <span className="hidden sm:block text-xs text-black">
+//                     Wishlist
+//                   </span>
+//                 </div>
+//               </Link>
+
+
+//             </div>
+
+//             {/* Account */}
+//             <div
+//               className="flex flex-col items-center cursor-pointer relative"
+//               ref={accountRef}
+//             >
+//               <div
+//                 onClick={() => {
+//                   if (!isAuthenticated) {
+//                     navigate("/auth");
+//                   } else {
+//                     setAccountOpen(!accountOpen);
+//                   }
+//                 }}
+//                 className="flex flex-col items-center hover:text-black transition-colors"
+//               >
+//                 <FaUser className="text-lg md:text-xl" />
+//                 <span className="hidden sm:block text-xs text-black">
+//                   Account
+//                 </span>
+//               </div>
+
+//               {isAuthenticated && accountOpen && (
+//                 <div className="absolute top-12 right-0 w-64 bg-white border shadow-lg rounded-md p-4 z-20 animate-fadeIn">
+//                   <p className="font-medium text-yellow-900 mb-3">
+//                     Welcome To Everglow Jewels!
+//                   </p>
+//                   <ul className="space-y-3 text-black">
+//                     <Link to="/profile" onClick={handleLinkClick}>
+//                       <li className="hover:text-yellow-700 mb-2">Your Profile</li>
+//                     </Link>
+//                     <Link to="/myorder" onClick={handleLinkClick}>
+//                       <li className="hover:text-yellow-700 mb-2">My Orders</li>
+//                     </Link>
+//                     <Link to="/terms" onClick={handleLinkClick}>
+//                       <li className="hover:text-yellow-700 mb-2">
+//                         Terms & Conditions
+//                       </li>
+//                     </Link>
+//                     <Link to="/privacy" onClick={handleLinkClick}>
+//                       <li className="hover:text-yellow-700 mb-2">Privacy Policy</li>
+//                     </Link>
+//                     <Link to="/contact" onClick={handleLinkClick}>
+//                       <li className="hover:text-yellow-700 mb-2">Contact Us</li>
+//                     </Link>
+//                     <li
+//                       onClick={() => {
+//                         logout(); 
+//                         clearWishlist(); 
+//                         setIsAuthenticated(false);
+//                         handleLinkClick();
+//                         navigate("/auth");  
+//                       }}
+//                       className="hover:text-red-600 mb-2 cursor-pointer"
+//                     >
+//                       Logout
+//                     </li>
+//                   </ul>
+//                 </div>
+//               )}
+//             </div>
+
+//             {/* Drawer Button */}
+//             <button
+//               className="text-xl md:hidden"
+//               onClick={() => setDrawerOpen(true)}
+//             >
+//               <FaBars />
+//             </button>
+//           </div>
+//         </div>
+
+//         {/* Desktop Navbar */}
+//         <div className="border-t border-gray-200 hidden md:block">
+//           <NavBar onLinkClick={handleLinkClick} />
+//         </div>
+
+//         {/* Mobile Drawer */}
+//         <Drawer
+//           anchor="right"
+//           open={drawerOpen}
+//           onClose={() => setDrawerOpen(false)}
+//         >
+//           <div className="w-64 h-full flex flex-col justify-between bg-white">
+//             <div className="p-5">
+//               <NavBar onLinkClick={handleLinkClick} mobile />
+//             </div>
+
+//             <div className="border-t p-5 flex justify-around text-yellow-900">
+//               <Link to="/wishlist" onClick={handleLinkClick} className="relative">
+//                 <div className="flex flex-col items-center cursor-pointer hover:text-black transition-colors">
+//                   <FaHeart className="text-xl" />
+//                   {wishlistCount > 0 && (
+//                     <span className="absolute -top-2 -right-3 bg-yellow-900 text-white text-[10px] px-1.5 rounded-full">
+//                       {wishlistCount}
+//                     </span>
+//                   )}
+//                   <span className="text-xs text-black">Wishlist</span>
+//                 </div>
+//               </Link>
+
+//               <Link to="/cart" onClick={handleLinkClick} className="relative">
+//                 <div className="flex flex-col items-center cursor-pointer hover:text-black transition-colors">
+//                   <FaShoppingCart className="text-xl" />
+//                   {cartCount > 0 && (
+//                     <span className="absolute -top-2 -right-3 bg-yellow-900 text-white text-[10px] px-1.5 rounded-full">
+//                       {cartCount}
+//                     </span>
+//                   )}
+//                   <span className="text-xs text-black">Cart</span>
+//                 </div>
+//               </Link>
+//             </div>
+//           </div>
+//         </Drawer>
+//       </header>
+//     </>
+//   );
+// };
+
+// export default Header;
+
 import React, { useState, useRef, useEffect } from "react";
 import {
   FaHeart,
@@ -1193,19 +1446,21 @@ import NavBar from "../NavBar/NavBar";
 import { Link, useNavigate } from "react-router-dom";
 import SearchOverlay from "../SearchOverlay/SearchOverlay";
 import { logout } from "../../utils/auth";
-import {useCart} from "../../context/cartContext";
+import { useCart } from "../../context/cartContext";
 
 const Header = () => {
   const [accountOpen, setAccountOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    !!localStorage.getItem("token")
+  );
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState(""); // controlled search
 
   const accountRef = useRef(null);
   const searchRef = useRef(null);
-  const { count, wishCount, clear, clearWishlist} = useCart();
+  const { count, wishCount, clear, clearWishlist } = useCart();
   const navigate = useNavigate();
 
   // dummy counts (backend se laa sakte ho)
@@ -1219,9 +1474,11 @@ const Header = () => {
       }
     };
     document.addEventListener("mousedown", handler);
+
     const onAuth = () => setIsAuthenticated(!!localStorage.getItem("token"));
     window.addEventListener("auth-change", onAuth);
-    window.addEventListener("storage", onAuth); // cross-tab
+    window.addEventListener("storage", onAuth); // cross-tab sync
+
     return () => {
       document.removeEventListener("mousedown", handler);
       window.removeEventListener("auth-change", onAuth);
@@ -1232,6 +1489,16 @@ const Header = () => {
   const handleLinkClick = () => {
     setDrawerOpen(false);
     setAccountOpen(false);
+  };
+
+  const handleAccountClick = () => {
+    if (!isAuthenticated) {
+      // Agar token nahi hai → auth page par redirect
+      navigate("/auth");
+    } else {
+      // Agar login hai → account menu toggle
+      setAccountOpen((prev) => !prev);
+    }
   };
 
   return (
@@ -1307,8 +1574,6 @@ const Header = () => {
                   </span>
                 </div>
               </Link>
-
-
             </div>
 
             {/* Account */}
@@ -1317,13 +1582,7 @@ const Header = () => {
               ref={accountRef}
             >
               <div
-                onClick={() => {
-                  if (!isAuthenticated) {
-                    navigate("/auth");
-                  } else {
-                    setAccountOpen(!accountOpen);
-                  }
-                }}
+                onClick={handleAccountClick}
                 className="flex flex-col items-center hover:text-black transition-colors"
               >
                 <FaUser className="text-lg md:text-xl" />
@@ -1332,6 +1591,7 @@ const Header = () => {
                 </span>
               </div>
 
+              {/* Account Dropdown */}
               {isAuthenticated && accountOpen && (
                 <div className="absolute top-12 right-0 w-64 bg-white border shadow-lg rounded-md p-4 z-20 animate-fadeIn">
                   <p className="font-medium text-yellow-900 mb-3">
@@ -1350,18 +1610,20 @@ const Header = () => {
                       </li>
                     </Link>
                     <Link to="/privacy" onClick={handleLinkClick}>
-                      <li className="hover:text-yellow-700 mb-2">Privacy Policy</li>
+                      <li className="hover:text-yellow-700 mb-2">
+                        Privacy Policy
+                      </li>
                     </Link>
                     <Link to="/contact" onClick={handleLinkClick}>
                       <li className="hover:text-yellow-700 mb-2">Contact Us</li>
                     </Link>
                     <li
                       onClick={() => {
-                        logout(); 
-                        clearWishlist(); 
+                        logout();
+                        clearWishlist();
                         setIsAuthenticated(false);
                         handleLinkClick();
-                        navigate("/auth");  
+                        navigate("/auth");
                       }}
                       className="hover:text-red-600 mb-2 cursor-pointer"
                     >
@@ -1399,29 +1661,22 @@ const Header = () => {
             </div>
 
             <div className="border-t p-5 flex justify-around text-yellow-900">
-              <Link to="/wishlist" onClick={handleLinkClick} className="relative">
+              <Link to="/wishlist" className="relative">
                 <div className="flex flex-col items-center cursor-pointer hover:text-black transition-colors">
                   <FaHeart className="text-xl" />
-                  {wishlistCount > 0 && (
-                    <span className="absolute -top-2 -right-3 bg-yellow-900 text-white text-[10px] px-1.5 rounded-full">
-                      {wishlistCount}
+                  {wishCount > 0 && (
+                    <span className="absolute -top-0 -right-0 bg-yellow-900 text-white text-[10px] px-1.5 rounded-full">
+                      {wishCount}
                     </span>
                   )}
-                  <span className="text-xs text-black">Wishlist</span>
+                  <span className="hidden sm:block text-xs text-black">
+                    Wishlist
+                  </span>
                 </div>
               </Link>
 
-              <Link to="/cart" onClick={handleLinkClick} className="relative">
-                <div className="flex flex-col items-center cursor-pointer hover:text-black transition-colors">
-                  <FaShoppingCart className="text-xl" />
-                  {cartCount > 0 && (
-                    <span className="absolute -top-2 -right-3 bg-yellow-900 text-white text-[10px] px-1.5 rounded-full">
-                      {cartCount}
-                    </span>
-                  )}
-                  <span className="text-xs text-black">Cart</span>
-                </div>
-              </Link>
+
+
             </div>
           </div>
         </Drawer>

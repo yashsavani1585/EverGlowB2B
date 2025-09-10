@@ -59,11 +59,11 @@ const Home = () => {
       </Suspense>
 
       <Suspense fallback={<Loader />}>
-        <CategorySection  />
+        <CategorySection />
       </Suspense>
 
       <Suspense fallback={<Loader />}>
-      <DimondCategorySection/>
+        <DimondCategorySection />
       </Suspense>
 
       <Suspense fallback={<Loader />}>
@@ -75,6 +75,14 @@ const Home = () => {
       </Suspense>
 
       <Suspense fallback={<Loader />}>
+        <PromiseSection />
+      </Suspense>
+
+            <Suspense fallback={<Loader />}>
+        <CertifiedText />
+      </Suspense>
+
+      <Suspense fallback={<Loader />}>
         <LatestOffers />
       </Suspense>
 
@@ -83,18 +91,14 @@ const Home = () => {
       </Suspense>
 
       <div className="mb-10">
-      <Suspense fallback={<Loader />}>
-        <EverglowPromise />
-      </Suspense>
+        <Suspense fallback={<Loader />}>
+          <EverglowPromise />
+        </Suspense>
       </div>
 
-      <Suspense fallback={<Loader />}>
-        <PromiseSection />
-      </Suspense>
 
-      <Suspense fallback={<Loader />}>
-        <CertifiedText/>
-      </Suspense>
+
+
 
       <div className="hidden md:block">
         <Suspense fallback={<Loader />}>
