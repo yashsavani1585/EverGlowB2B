@@ -178,60 +178,51 @@
 
 // export { addToCart, updateCart, getUserCart, removeFromCart };
 
+// controllers/cartController.js
 import userModel from "../models/userModel.js";
-import { createClient } from "redis";
+import connectRedis from "../config/redis.js"; // ✅ Reusable Redis connection
 
-// 🔹 Redis Client Init
-const redisClient = createClient();
-redisClient.on("error", (err) => console.error("Redis Error:", err));
-await redisClient.connect();
+// 🔹 Initialize Redis client once
+const redisClient = await connectRedis();
 
 // Normalize color key
 const normColorKey = (c) => {
   const k = String(c || "").trim().toLowerCase();
   if (!k || k === "-" || k === "null" || k === "undefined") return "-";
   if (k === "rosegold" || k === "rose-gold" || k === "rose") return "rose-gold";
-  if (k === "whitegold" || k === "white-gold" || k === "white")
-    return "white-gold";
+  if (k === "whitegold" || k === "white-gold" || k === "white") return "white-gold";
   if (k === "yellow" || k === "gold") return "gold";
   return k;
 };
 
 const getUID = (req) => req.user?.id || req.body.userId;
 
-// 🔹 Sync Redis + MongoDB
+// 🔹 Helper: sync Redis + MongoDB
 const saveCart = async (userId, cart) => {
-  // Redis save
-  await redisClient.set(`cart:${userId}`, JSON.stringify(cart));
-  // Mongo save
+  await redisClient.setEx(`cart:${userId}`, 60 * 60, JSON.stringify(cart)); // cache 1 hour
   await userModel.findByIdAndUpdate(userId, { cartData: cart }, { new: true });
 };
 
-// 🔹 Add to cart
+// 🔹 Add item to cart
 const addToCart = async (req, res) => {
   try {
     const userId = getUID(req);
     const { itemId, color = null, quantity = 1 } = req.body;
+
     if (!userId || !itemId)
       return res.json({ success: false, message: "Missing userId or itemId" });
 
     const user = await userModel.findById(userId);
-    if (!user)
-      return res.json({ success: false, message: "User not found" });
+    if (!user) return res.json({ success: false, message: "User not found" });
 
     // Redis get
     let cart = {};
     const cached = await redisClient.get(`cart:${userId}`);
-    if (cached) {
-      cart = JSON.parse(cached);
-    } else {
-      cart = user.cartData || {};
-    }
+    cart = cached ? JSON.parse(cached) : user.cartData || {};
 
     const ckey = normColorKey(color);
     cart[itemId] = cart[itemId] || {};
-    cart[itemId][ckey] =
-      Number(cart[itemId][ckey] || 0) + Number(quantity || 1);
+    cart[itemId][ckey] = (Number(cart[itemId][ckey] || 0) + Number(quantity));
 
     await saveCart(userId, cart);
 
@@ -247,12 +238,12 @@ const updateCart = async (req, res) => {
   try {
     const userId = getUID(req);
     const { itemId, color = null, quantity } = req.body;
+
     if (!userId || !itemId || typeof quantity !== "number")
-      return res.json({ success: false, message: "Missing fields" });
+      return res.json({ success: false, message: "Missing or invalid fields" });
 
     const user = await userModel.findById(userId);
-    if (!user)
-      return res.json({ success: false, message: "User not found" });
+    if (!user) return res.json({ success: false, message: "User not found" });
 
     let cart = {};
     const cached = await redisClient.get(`cart:${userId}`);
@@ -281,12 +272,10 @@ const updateCart = async (req, res) => {
 const getUserCart = async (req, res) => {
   try {
     const userId = getUID(req);
-    if (!userId)
-      return res.json({ success: false, message: "Missing userId" });
+    if (!userId) return res.json({ success: false, message: "Missing userId" });
 
     const user = await userModel.findById(userId);
-    if (!user)
-      return res.json({ success: false, message: "User not found" });
+    if (!user) return res.json({ success: false, message: "User not found" });
 
     let cart = {};
     const cached = await redisClient.get(`cart:${userId}`);
@@ -294,7 +283,7 @@ const getUserCart = async (req, res) => {
       cart = JSON.parse(cached);
     } else {
       cart = user.cartData || {};
-      await redisClient.set(`cart:${userId}`, JSON.stringify(cart));
+      await redisClient.setEx(`cart:${userId}`, 60 * 60, JSON.stringify(cart)); // cache 1 hour
     }
 
     res.json({ success: true, cartData: cart });
@@ -309,9 +298,9 @@ const removeFromCart = async (req, res) => {
   try {
     const userId = getUID(req);
     const { itemId, color = null } = req.body;
+
     const user = await userModel.findById(userId);
-    if (!user)
-      return res.json({ success: false, message: "User not found" });
+    if (!user) return res.json({ success: false, message: "User not found" });
 
     let cart = {};
     const cached = await redisClient.get(`cart:${userId}`);
@@ -326,9 +315,9 @@ const removeFromCart = async (req, res) => {
     await saveCart(userId, cart);
 
     res.json({ success: true, message: "Removed from cart", cartData: cart });
-  } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: error.message });
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, message: err.message });
   }
 };
 

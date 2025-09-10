@@ -31,20 +31,13 @@ let redisClient;
 
 const connectRedis = async () => {
   if (!redisClient) {
-    const redisUrl = process.env.REDIS_URL; // just the URL string, no `redis-cli -u`
-    
-    redisClient = createClient(
-      redisUrl
-        ? { url: redisUrl }
-        : {
-            socket: {
-              host: process.env.REDIS_HOST || "127.0.0.1",
-              port: process.env.REDIS_PORT || 6379,
-            },
-            username: process.env.REDIS_USERNAME,
-            password: process.env.REDIS_PASSWORD,
-          }
-    );
+    if (!process.env.REDIS_URL) {
+      throw new Error("REDIS_URL is not set in .env");
+    }
+
+    redisClient = createClient({
+      url: process.env.REDIS_URL
+    });
 
     redisClient.on("error", (err) => console.error("Redis Error:", err));
     redisClient.on("connect", () => console.log("Redis Connected"));
@@ -56,6 +49,7 @@ const connectRedis = async () => {
 };
 
 export default connectRedis;
+
 
 
 
