@@ -4,7 +4,7 @@ import { backendUrl } from '../App';
 import { toast } from 'react-toastify';
 
 // Optional: import your brand logo if you have it
-// import logo from '../assets/everglow-logo.svg';
+// import logo from '../assets/GEMS GLOBAL-logo.svg';
 
 const Login = ({ setToken }) => {
   const [email, setEmail] = useState('');
@@ -37,17 +37,17 @@ const Login = ({ setToken }) => {
       style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
     >
       {/* Top promo bar */}
-      <div className="w-full bg-[#4f1c51] text-white text-center py-2 text-sm">
-        ✨ Admin Access • EverGlow Jewellers
+      <div className="w-full bg-[#CEBB98] text-white text-center py-2 text-sm">
+        ✨ Admin Access • GEMS GLOBAL Jewellers
       </div>
 
       {/* Header */}
       <header className="w-full bg-white/80 backdrop-blur-sm border-b">
         <div className="max-w-6xl mx-auto flex items-center justify-between px-4 py-4">
           <div className="flex items-center gap-3">
-            {/* {logo && <img src={logo} alt="EverGlow" className="h-9" />} */}
+            {/* {logo && <img src={logo} alt="GEMS GLOBAL" className="h-9" />} */}
             <span className="text-xl sm:text-2xl font-semibold text-[#4f1c51]">
-              EverGlow Admin
+              GEMS GLOBAL Admin
             </span>
           </div>
           <div className="hidden sm:block text-sm text-gray-500">
@@ -65,7 +65,7 @@ const Login = ({ setToken }) => {
                 Admin Sign In
               </h1>
               <p className="text-sm text-gray-600 text-center mb-6">
-                Use your EverGlow admin credentials to continue.
+                Use your GEMS GLOBAL admin credentials to continue.
               </p>
 
               <form onSubmit={onsubmitHandler} className="space-y-4">
@@ -75,7 +75,7 @@ const Login = ({ setToken }) => {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.currentTarget.value)}
-                    placeholder="admin@everglow.com"
+                    placeholder="admin@GEMS GLOBAL.com"
                     required
                     className="w-full rounded-xl border border-gray-300 bg-white px-3 py-2.5 outline-none
                                shadow-sm focus:ring-4 focus:ring-pink-200 focus:border-[#4f1c51]
@@ -120,7 +120,7 @@ const Login = ({ setToken }) => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full rounded-xl bg-[#4f1c51] text-white py-2.5 mt-2
+                  className="w-full rounded-xl bg-[#CEBB98] text-white py-2.5 mt-2
                              shadow hover:shadow-md active:scale-[0.99]
                              transition disabled:opacity-60 disabled:cursor-not-allowed"
                 >
@@ -140,7 +140,7 @@ const Login = ({ setToken }) => {
       {/* Footer (minimal to match theme) */}
       <footer className="border-t bg-white">
         <div className="max-w-6xl mx-auto px-4 py-4 text-xs text-gray-500 text-center">
-          © {new Date().getFullYear()} EverGlow Jewellers • All rights reserved.
+          © {new Date().getFullYear()} GEMS GLOBAL Jewellers • All rights reserved.
         </div>
       </footer>
     </div>

@@ -86,7 +86,7 @@ const removeProduct = async (id) => {
               <div className="flex gap-2 justify-end">
                 <button
                   onClick={() => editProduct(item._id)}
-                  className="px-3 py-1.5 rounded-lg bg-[#4f1c51] text-white text-xs shadow hover:shadow-md"
+                  className="px-3 py-1.5 rounded-lg bg-[#CEBB98] text-white text-xs shadow hover:shadow-md"
                 >
                   Edit
                 </button>

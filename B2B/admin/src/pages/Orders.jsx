@@ -106,7 +106,7 @@ const Orders = ({ token }) => {
           </div>
           <button
             onClick={fetchAllOrders}
-            className="rounded-xl bg-[#4f1c51] text-white px-4 py-2 shadow hover:shadow-md active:scale-[0.99] transition"
+            className="rounded-xl bg-[#CEBB98] text-white px-4 py-2 shadow hover:shadow-md active:scale-[0.99] transition"
           >
             Refresh
           </button>

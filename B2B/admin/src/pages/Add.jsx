@@ -129,7 +129,7 @@
 //                     <input onChange={()=>setBestseller(prev => !prev)} checked={bestseller} type='checkbox' id='bestseller' />
 //                     <label className='cursor-pointer' htmlFor="bestseller">Add to bestseller</label>
 //                 </div>
-//                 <button type='submit' className='w-28 py-3 mt-4 bg-black text-white'>ADD</button>
+//                 <button type='submit' className='w-28 py-3 mt-4 bg-black text-black'>ADD</button>
 
 //     </form>
 //   )
@@ -536,7 +536,7 @@ const Add = ({ token }) => {
           </label>
 
           <button type="submit" disabled={loading}
-            className="self-start rounded-xl bg-[#4f1c51] text-white px-6 py-2.5 shadow hover:shadow-md disabled:opacity-60">
+            className="self-start rounded-xl bg-[#CEBB98] text-black px-6 py-2.5 shadow hover:shadow-md disabled:opacity-60">
             {loading ? "Adding…" : "Add Product"}
           </button>
         </form>
@@ -757,7 +757,7 @@ export default Add;
 //         <input onChange={()=>setBestseller(prev => !prev)} checked={bestseller} type='checkbox' id='bestseller' />
 //         <label className='cursor-pointer' htmlFor="bestseller">Add to bestseller</label>
 //       </div>
-//       <button type='submit' className='w-28 py-3 mt-4 bg-black text-white rounded'>ADD</button>
+//       <button type='submit' className='w-28 py-3 mt-4 bg-black text-black rounded'>ADD</button>
 //     </form>
 //   )
 // }

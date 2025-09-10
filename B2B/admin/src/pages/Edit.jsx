@@ -487,7 +487,7 @@ const Edit = ({ token }) => {
           </label>
 
           <button type="submit" disabled={loading}
-                  className="self-start rounded-xl bg-[#4f1c51] text-white px-6 py-2.5 shadow hover:shadow-md disabled:opacity-60">
+                  className="self-start rounded-xl bg-[#CEBB98] text-white px-6 py-2.5 shadow hover:shadow-md disabled:opacity-60">
             {loading ? 'Updating…' : 'Update Product'}
           </button>
         </form>

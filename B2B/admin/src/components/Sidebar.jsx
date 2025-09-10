@@ -4,18 +4,18 @@ import { NavLink } from 'react-router-dom';
 const linkBase =
   'flex items-center gap-3 px-4 py-2 rounded-xl transition focus:outline-none';
 const linkIdle =
-  'text-white/90 hover:bg-white/10';
+  'text-black/90 hover:bg-white/10';
 const linkActive =
-  'bg-white/15 text-white ring-1 ring-white/20 shadow-sm';
+  'bg-white/15 text-black ring-1 ring-white/20 shadow-sm';
 
 const Sidebar = () => {
   return (
     <aside
-      className="hidden md:block w-[18%] min-h-screen bg-[#4f1c51] text-white sticky top-0 p-4"
+      className="hidden md:block w-[18%] min-h-screen bg-[#CEBB98] text-black sticky top-0 p-4"
       style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
     >
       <div className="mb-4 px-2">
-        <p className="text-sm text-white/80">Navigation</p>
+        <p className="text-sm text-black/80">Navigation</p>
       </div>
 
       <nav className="flex flex-col gap-2">
