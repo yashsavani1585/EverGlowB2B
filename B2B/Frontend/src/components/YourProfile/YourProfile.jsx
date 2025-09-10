@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import profileImage from "../../assets/jawellarycontactPage.png";
 
-const USER_BASE = "http://localhost:4000/api/user";
+const USER_BASE = `${import.meta.env.VITE_API_BASE_URL}/user`;
 
 const splitName = (user) => {
   // Prefer explicit first/last if present (Google users)
