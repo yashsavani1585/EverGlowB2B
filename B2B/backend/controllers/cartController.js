@@ -63,45 +63,186 @@
 
 
 // controllers/cartController.js
-import userModel from "../models/userModel.js";
+// import userModel from "../models/userModel.js";
 
+// const normColorKey = (c) => {
+//   const k = String(c || "").trim().toLowerCase();
+//   if (!k || k === "-" || k === "null" || k === "undefined") return "-";
+//   // normalize your canonical color tags used in FE:
+//   if (k === "rosegold" || k === "rose-gold" || k === "rose") return "rose-gold";
+//   if (k === "whitegold" || k === "white-gold" || k === "white") return "white-gold";
+//   if (k === "yellow" || k === "gold") return "gold";
+//   return k; // fallback (if you add other variants later)
+// };
+
+// const getUID = (req) => req.user?.id || req.body.userId;
+
+// const addToCart = async (req, res) => {
+//   try {
+//     const userId = getUID(req);
+//     const { itemId, color = null, quantity = 1 } = req.body;
+//     if (!userId || !itemId) return res.json({ success: false, message: "Missing userId or itemId" });
+
+//     const user = await userModel.findById(userId);
+//     if (!user) return res.json({ success: false, message: "User not found" });
+
+//     const ckey = normColorKey(color);
+//     const cart = user.cartData || {};
+
+//     cart[itemId] = cart[itemId] || {};
+//     cart[itemId][ckey] = Number(cart[itemId][ckey] || 0) + Number(quantity || 1);
+
+//     user.cartData = cart;
+//     await user.save();
+
+//     res.json({ success: true, message: "Added to cart" });
+//   } catch (err) {
+//     console.error(err);
+//     res.json({ success: false, message: err.message });
+//   }
+// };
+
+// const updateCart = async (req, res) => {
+//   try {
+//     const userId = getUID(req);
+//     const { itemId, color = null, quantity } = req.body;
+//     if (!userId || !itemId || typeof quantity !== "number")
+//       return res.json({ success: false, message: "Missing fields" });
+
+//     const user = await userModel.findById(userId);
+//     if (!user) return res.json({ success: false, message: "User not found" });
+
+//     const ckey = normColorKey(color);
+//     const cart = user.cartData || {};
+//     cart[itemId] = cart[itemId] || {};
+
+//     if (quantity <= 0) {
+//       // remove that variant
+//       delete cart[itemId][ckey];
+//       if (Object.keys(cart[itemId]).length === 0) delete cart[itemId];
+//     } else {
+//       cart[itemId][ckey] = quantity;
+//     }
+
+//     user.cartData = cart;
+//     await user.save();
+
+//     res.json({ success: true, message: "Cart updated" });
+//   } catch (err) {
+//     console.error(err);
+//     res.json({ success: false, message: err.message });
+//   }
+// };
+
+// const getUserCart = async (req, res) => {
+//   try {
+//     const userId = getUID(req);
+//     if (!userId) return res.json({ success: false, message: "Missing userId" });
+
+//     const user = await userModel.findById(userId);
+//     if (!user) return res.json({ success: false, message: "User not found" });
+
+//     res.json({ success: true, cartData: user.cartData || {} });
+//   } catch (err) {
+//     console.error(err);
+//     res.json({ success: false, message: err.message });
+//   }
+// };
+
+
+// // remove a single cart line (by key)
+// // remove a single line by productId + color
+// const removeFromCart = async (req, res) => {
+//   try {
+//     const userId = getUID(req);
+//     const { itemId, color = null } = req.body; // itemId = productId
+//     const user = await userModel.findById(userId);
+//     if (!user) return res.json({ success: false, message: "User not found" });
+
+//     const ckey = normColorKey(color);
+//     const cart = user.cartData || {};
+//     if (cart[itemId]) {
+//       delete cart[itemId][ckey];
+//       if (!Object.keys(cart[itemId]).length) delete cart[itemId];
+//       user.cartData = cart;
+//       user.markModified('cartData');
+//       await user.save();
+//     }
+//     res.json({ success: true, message: "Removed from Cart" });
+//   } catch (error) {
+//     console.log(error);
+//     res.json({ success: false, message: error.message });
+//   }
+// };
+
+
+// export { addToCart, updateCart, getUserCart, removeFromCart };
+
+import userModel from "../models/userModel.js";
+import { createClient } from "redis";
+
+// 🔹 Redis Client Init
+const redisClient = createClient();
+redisClient.on("error", (err) => console.error("Redis Error:", err));
+await redisClient.connect();
+
+// Normalize color key
 const normColorKey = (c) => {
   const k = String(c || "").trim().toLowerCase();
   if (!k || k === "-" || k === "null" || k === "undefined") return "-";
-  // normalize your canonical color tags used in FE:
   if (k === "rosegold" || k === "rose-gold" || k === "rose") return "rose-gold";
-  if (k === "whitegold" || k === "white-gold" || k === "white") return "white-gold";
+  if (k === "whitegold" || k === "white-gold" || k === "white")
+    return "white-gold";
   if (k === "yellow" || k === "gold") return "gold";
-  return k; // fallback (if you add other variants later)
+  return k;
 };
 
 const getUID = (req) => req.user?.id || req.body.userId;
 
+// 🔹 Sync Redis + MongoDB
+const saveCart = async (userId, cart) => {
+  // Redis save
+  await redisClient.set(`cart:${userId}`, JSON.stringify(cart));
+  // Mongo save
+  await userModel.findByIdAndUpdate(userId, { cartData: cart }, { new: true });
+};
+
+// 🔹 Add to cart
 const addToCart = async (req, res) => {
   try {
     const userId = getUID(req);
     const { itemId, color = null, quantity = 1 } = req.body;
-    if (!userId || !itemId) return res.json({ success: false, message: "Missing userId or itemId" });
+    if (!userId || !itemId)
+      return res.json({ success: false, message: "Missing userId or itemId" });
 
     const user = await userModel.findById(userId);
-    if (!user) return res.json({ success: false, message: "User not found" });
+    if (!user)
+      return res.json({ success: false, message: "User not found" });
+
+    // Redis get
+    let cart = {};
+    const cached = await redisClient.get(`cart:${userId}`);
+    if (cached) {
+      cart = JSON.parse(cached);
+    } else {
+      cart = user.cartData || {};
+    }
 
     const ckey = normColorKey(color);
-    const cart = user.cartData || {};
-
     cart[itemId] = cart[itemId] || {};
-    cart[itemId][ckey] = Number(cart[itemId][ckey] || 0) + Number(quantity || 1);
+    cart[itemId][ckey] =
+      Number(cart[itemId][ckey] || 0) + Number(quantity || 1);
 
-    user.cartData = cart;
-    await user.save();
+    await saveCart(userId, cart);
 
-    res.json({ success: true, message: "Added to cart" });
+    res.json({ success: true, message: "Added to cart", cartData: cart });
   } catch (err) {
     console.error(err);
     res.json({ success: false, message: err.message });
   }
 };
 
+// 🔹 Update cart
 const updateCart = async (req, res) => {
   try {
     const userId = getUID(req);
@@ -110,70 +251,85 @@ const updateCart = async (req, res) => {
       return res.json({ success: false, message: "Missing fields" });
 
     const user = await userModel.findById(userId);
-    if (!user) return res.json({ success: false, message: "User not found" });
+    if (!user)
+      return res.json({ success: false, message: "User not found" });
+
+    let cart = {};
+    const cached = await redisClient.get(`cart:${userId}`);
+    cart = cached ? JSON.parse(cached) : user.cartData || {};
 
     const ckey = normColorKey(color);
-    const cart = user.cartData || {};
     cart[itemId] = cart[itemId] || {};
 
     if (quantity <= 0) {
-      // remove that variant
       delete cart[itemId][ckey];
       if (Object.keys(cart[itemId]).length === 0) delete cart[itemId];
     } else {
       cart[itemId][ckey] = quantity;
     }
 
-    user.cartData = cart;
-    await user.save();
+    await saveCart(userId, cart);
 
-    res.json({ success: true, message: "Cart updated" });
+    res.json({ success: true, message: "Cart updated", cartData: cart });
   } catch (err) {
     console.error(err);
     res.json({ success: false, message: err.message });
   }
 };
 
+// 🔹 Get user cart
 const getUserCart = async (req, res) => {
   try {
     const userId = getUID(req);
-    if (!userId) return res.json({ success: false, message: "Missing userId" });
+    if (!userId)
+      return res.json({ success: false, message: "Missing userId" });
 
     const user = await userModel.findById(userId);
-    if (!user) return res.json({ success: false, message: "User not found" });
+    if (!user)
+      return res.json({ success: false, message: "User not found" });
 
-    res.json({ success: true, cartData: user.cartData || {} });
+    let cart = {};
+    const cached = await redisClient.get(`cart:${userId}`);
+    if (cached) {
+      cart = JSON.parse(cached);
+    } else {
+      cart = user.cartData || {};
+      await redisClient.set(`cart:${userId}`, JSON.stringify(cart));
+    }
+
+    res.json({ success: true, cartData: cart });
   } catch (err) {
     console.error(err);
     res.json({ success: false, message: err.message });
   }
 };
 
-
-// remove a single cart line (by key)
-// remove a single line by productId + color
+// 🔹 Remove from cart
 const removeFromCart = async (req, res) => {
   try {
     const userId = getUID(req);
-    const { itemId, color = null } = req.body; // itemId = productId
+    const { itemId, color = null } = req.body;
     const user = await userModel.findById(userId);
-    if (!user) return res.json({ success: false, message: "User not found" });
+    if (!user)
+      return res.json({ success: false, message: "User not found" });
+
+    let cart = {};
+    const cached = await redisClient.get(`cart:${userId}`);
+    cart = cached ? JSON.parse(cached) : user.cartData || {};
 
     const ckey = normColorKey(color);
-    const cart = user.cartData || {};
     if (cart[itemId]) {
       delete cart[itemId][ckey];
       if (!Object.keys(cart[itemId]).length) delete cart[itemId];
-      user.cartData = cart;
-      user.markModified('cartData');
-      await user.save();
     }
-    res.json({ success: true, message: "Removed from Cart" });
+
+    await saveCart(userId, cart);
+
+    res.json({ success: true, message: "Removed from cart", cartData: cart });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
   }
 };
-
 
 export { addToCart, updateCart, getUserCart, removeFromCart };

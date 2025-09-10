@@ -12,12 +12,14 @@ import session from "express-session";
 import authRoutes from "./routes/auth.routes.js";
 import formsRouter from "./routes/forms.routes.js";
 import pricingRouter from "./routes/pricingRoutes.js";
+import connectRedis from './config/redis.js'
 
 // App Config
 const app = express()
 const port = process.env.PORT || 4000
 connectDB()
 connectCloudinary()
+connectRedis()
 
 app.use(
   session({

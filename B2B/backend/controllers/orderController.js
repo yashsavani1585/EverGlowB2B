@@ -1,5 +1,5 @@
-import orderModel from "../models/orderModel.js";
-import userModel from "../models/userModel.js";
+// import orderModel from "../models/orderModel.js";
+// import userModel from "../models/userModel.js";
 // import Stripe from 'stripe'
 //global variables
 // const currency = 'inr'
@@ -8,33 +8,33 @@ import userModel from "../models/userModel.js";
 // const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
 // Placing orders using COD method
-const placeOrder = async (req,res) => {
-    try {
-        const {userId, items, amount, address} = req.body;
+// const placeOrder = async (req,res) => {
+//     try {
+//         const {userId, items, amount, address} = req.body;
 
-        const orderData = {
-            userId,
-            items,
-            address,
-            amount,
-            paymentMethod:"COD",
-            payment:false,
-            date: Date.now()
-        }
+//         const orderData = {
+//             userId,
+//             items,
+//             address,
+//             amount,
+//             paymentMethod:"COD",
+//             payment:false,
+//             date: Date.now()
+//         }
 
-        const newOrder = new orderModel(orderData)
-        await newOrder.save()
+//         const newOrder = new orderModel(orderData)
+//         await newOrder.save()
 
-        await userModel.findByIdAndUpdate(userId, {cartData:{}})
+//         await userModel.findByIdAndUpdate(userId, {cartData:{}})
 
-        res.json({success:true, message:"Order Placed"})
+//         res.json({success:true, message:"Order Placed"})
 
-    } catch (error) {
-        console.log(error);
-        res.json({success:false, message:error.message})
+//     } catch (error) {
+//         console.log(error);
+//         res.json({success:false, message:error.message})
         
-    }
-}
+//     }
+// }
 
 // Placing orders using Stripe method
 // const placeOrderStripe = async (req,res) => {
@@ -116,45 +116,173 @@ const placeOrder = async (req,res) => {
 // }
 
 // Placing orders using Razorpay method
-const placeOrderRazorpay = async (req,res) => {
+// const placeOrderRazorpay = async (req,res) => {
     
-}
+// }
 
-// All Orders data for admin panel
-const allOrders = async (req,res) => {
-    try {
-        const orders = await orderModel.find({})
-        res.json({success:true, orders})
-    } catch (error) {
-        console.log(error);
-        res.json({success:false, message:error.message})
-    }
-}
+// // All Orders data for admin panel
+// const allOrders = async (req,res) => {
+//     try {
+//         const orders = await orderModel.find({})
+//         res.json({success:true, orders})
+//     } catch (error) {
+//         console.log(error);
+//         res.json({success:false, message:error.message})
+//     }
+// }
 
-// User Orders data for Frontend
-const userOrders = async (req,res) => {
-    try {
+// // User Orders data for Frontend
+// const userOrders = async (req,res) => {
+//     try {
         
-        const {userId} = req.body
-        const orders = await orderModel.find({userId})
-        res.json({success:true, orders})
+//         const {userId} = req.body
+//         const orders = await orderModel.find({userId})
+//         res.json({success:true, orders})
 
-    } catch (error) {
-        console.log(error);
-        res.json({success:false, message:error.message})
-    }
+//     } catch (error) {
+//         console.log(error);
+//         res.json({success:false, message:error.message})
+//     }
+// }
+
+// // update order status from AdminPanel
+// const updateStatus = async (req,res) => {
+//     try {
+//         const {orderId, status} = req.body
+//         await orderModel.findByIdAndUpdate(orderId, {status})
+//         res.json({success:true, message:'Status Updated'})
+//     } catch (error) {
+//         console.log(error);
+//         res.json({success:false, message:error.message})
+//     }
+// }
+
+// export {placeOrder, placeOrderRazorpay, allOrders, userOrders, updateStatus}
+
+import orderModel from "../models/orderModel.js";
+import userModel from "../models/userModel.js";
+import connectRedis from "../config/redis.js";
+
+// TTL for cached orders in seconds
+const ORDER_CACHE_TTL = Number(process.env.ORDER_CACHE_TTL || 60);
+
+// -------------------- Helpers --------------------
+async function cacheOrders(key, data) {
+  try {
+    const redisClient = await connectRedis();
+    await redisClient.setEx(key, ORDER_CACHE_TTL, JSON.stringify(data));
+  } catch (err) {
+    console.error("Redis setEx error:", err);
+  }
 }
 
-// update order status from AdminPanel
-const updateStatus = async (req,res) => {
-    try {
-        const {orderId, status} = req.body
-        await orderModel.findByIdAndUpdate(orderId, {status})
-        res.json({success:true, message:'Status Updated'})
-    } catch (error) {
-        console.log(error);
-        res.json({success:false, message:error.message})
-    }
+async function getCachedOrders(key) {
+  try {
+    const redisClient = await connectRedis();
+    const cached = await redisClient.get(key);
+    if (cached) return JSON.parse(cached);
+  } catch (err) {
+    console.error("Redis get error:", err);
+  }
+  return null;
 }
 
-export {placeOrder, placeOrderRazorpay, allOrders, userOrders, updateStatus}
+// -------------------- Controllers --------------------
+
+// Place COD order
+const placeOrder = async (req, res) => {
+  try {
+    const { userId, items, amount, address } = req.body;
+
+    const orderData = {
+      userId,
+      items,
+      address,
+      amount,
+      paymentMethod: "COD",
+      payment: false,
+      status: "Pending",
+      date: Date.now()
+    };
+
+    const newOrder = new orderModel(orderData);
+    await newOrder.save();
+
+    // Clear user's cart
+    await userModel.findByIdAndUpdate(userId, { cartData: {} });
+
+    // Clear cached user orders
+    const userOrdersCacheKey = `user_orders_${userId}`;
+    const redisClient = await connectRedis();
+    await redisClient.del(userOrdersCacheKey);
+
+    res.json({ success: true, message: "Order Placed" });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+// Placeholder for Razorpay integration
+const placeOrderRazorpay = async (req, res) => {
+  res.status(501).json({ success: false, message: "Razorpay not implemented yet" });
+};
+
+// Admin: Get all orders
+const allOrders = async (req, res) => {
+  try {
+    const cacheKey = "all_orders";
+    let orders = await getCachedOrders(cacheKey);
+
+    if (!orders) {
+      orders = await orderModel.find({});
+      await cacheOrders(cacheKey, orders);
+    }
+
+    res.json({ success: true, orders });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+// User: Get orders
+const userOrders = async (req, res) => {
+  try {
+    const { userId } = req.body;
+    const cacheKey = `user_orders_${userId}`;
+    let orders = await getCachedOrders(cacheKey);
+
+    if (!orders) {
+      orders = await orderModel.find({ userId });
+      await cacheOrders(cacheKey, orders);
+    }
+
+    res.json({ success: true, orders });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+// Admin: Update order status
+const updateStatus = async (req, res) => {
+  try {
+    const { orderId, status } = req.body;
+    await orderModel.findByIdAndUpdate(orderId, { status });
+
+    // Clear caches after update
+    const redisClient = await connectRedis();
+    await redisClient.del("all_orders");
+
+    const order = await orderModel.findById(orderId);
+    if (order?.userId) await redisClient.del(`user_orders_${order.userId}`);
+
+    res.json({ success: true, message: "Status Updated" });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+export { placeOrder, placeOrderRazorpay, allOrders, userOrders, updateStatus };
