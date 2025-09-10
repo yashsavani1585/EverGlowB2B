@@ -286,13 +286,339 @@
 //   getRelatedProducts
 // };
 
+// import { v2 as cloudinary } from "cloudinary";
+// import productModel from "../models/productModel.js";
+// import { cleanupTempFiles } from "../middleware/cloudinaryUpload.js";
+// import { COLOR_ENUM, SHAPE_ENUM } from "../models/productModel.js";
+// import connectRedis from "../config/redis.js";
+
+// // ---- helpers ----
+// const parseSpecs = (body) => {
+//   const shape = (body.diamondShape || "round").toLowerCase();
+//   return {
+//     productWeight: Number(body.productWeight ?? 0),
+//     goldWeight: Number(body.goldWeight ?? 0),
+//     diamondCarat: Number(body.diamondCarat ?? 0),
+//     diamondShape: SHAPE_ENUM.includes(shape) ? shape : "other",
+//     numberOfDiamonds: Number(body.numberOfDiamonds ?? 0),
+//     makingCharge: Number(body.makingCharge ?? 0),
+//   };
+// };
+
+// const uploadMany = async (filesArr = []) => {
+//   if (!Array.isArray(filesArr) || !filesArr.length) return [];
+//   const sliced = filesArr.slice(0, 10); // cap per color
+//   const uploaded = await Promise.all(
+//     sliced.map((f) =>
+//       cloudinary.uploader.upload(f.path, {
+//         resource_type: "image",
+//         folder: "everglow-jewellery",
+//         transformation: [
+//           { width: 800, height: 800, crop: "fill" },
+//           { quality: "auto" },
+//         ],
+//       })
+//     )
+//   );
+//   return uploaded.map((r) => r.secure_url);
+// };
+
+// // ---------- ADD ----------
+// const addProduct = async (req, res) => {
+//   try {
+//     const {
+//       name,
+//       description,
+//       price,
+//       discountPrice,
+//       category,
+//       bestseller,
+//       productWeight,
+//       goldWeight,
+//       diamondCarat,
+//       diamondShape,
+//       numberOfDiamonds,
+//       makingCharge,
+//       gstPercent,
+//       makingChargePerGram,
+//       skuGold,
+//       skuRose,
+//       skuWhite,
+//     } = req.body;
+
+//     if (!name || !description || !price || !category) {
+//       return res.json({ success: false, message: "Missing required fields" });
+//     }
+
+//     const imagesGold = await uploadMany(req.files?.goldImages || []);
+//     const imagesRose = await uploadMany(req.files?.roseImages || []);
+//     const imagesWhite = await uploadMany(req.files?.whiteImages || []);
+
+//     const flatImages = [...imagesGold, ...imagesRose, ...imagesWhite];
+//     if (!flatImages.length) {
+//       cleanupTempFiles(req.files);
+//       return res.json({ success: false, message: "At least one image is required" });
+//     }
+
+//     const defRaw = String(req.body.defaultColor || "").toLowerCase();
+//     let defaultColor = COLOR_ENUM.includes(defRaw) ? defRaw : "gold";
+//     const firstNonEmpty =
+//       imagesGold.length ? "gold" : imagesRose.length ? "rose-gold" : "white-gold";
+//     if (
+//       (defaultColor === "gold" && !imagesGold.length) ||
+//       (defaultColor === "rose-gold" && !imagesRose.length) ||
+//       (defaultColor === "white-gold" && !imagesWhite.length)
+//     ) {
+//       defaultColor = firstNonEmpty;
+//     }
+
+//     const priceNum = Number(price);
+//     const discountNum = discountPrice ? Number(discountPrice) : 0;
+//     const discountPercentage =
+//       discountNum > 0 && discountNum < priceNum
+//         ? Math.round(((priceNum - discountNum) / priceNum) * 100)
+//         : 0;
+
+//     const specs = parseSpecs(req.body);
+
+//     const product = new productModel({
+//       name,
+//       description,
+//       category,
+//       price: priceNum,
+//       discountPrice: discountNum,
+//       discountPercentage,
+//       bestseller: bestseller === "true" || bestseller === true,
+//       image: flatImages,
+//       imagesByColor: {
+//         gold: imagesGold,
+//         "rose-gold": imagesRose,
+//         "white-gold": imagesWhite,
+//       },
+//       skuByColor: {
+//         gold: (skuGold || "").trim(),
+//         "rose-gold": (skuRose || "").trim(),
+//         "white-gold": (skuWhite || "").trim(),
+//       },
+//       gstPercent: Number(gstPercent ?? 3),
+//       makingChargePerGram: Number(makingChargePerGram || 0),
+//       defaultColor,
+//       specs,
+//       date: Date.now(),
+//     });
+
+//     await product.save();
+//     cleanupTempFiles(req.files);
+
+//     // 🔥 Invalidate Redis cache
+//     const redisClient = await connectRedis();
+//     await redisClient.del("all_products");
+
+//     res.json({ success: true, message: "Product Added Successfully" });
+//   } catch (err) {
+//     console.log("addProduct error:", err);
+//     cleanupTempFiles(req.files);
+//     res.json({ success: false, message: err.message });
+//   }
+// };
+
+// // ---------- UPDATE ----------
+// const updateProduct = async (req, res) => {
+//   try {
+//     const { productId, name, description, price, category, bestseller } = req.body;
+//     if (!productId || !name || !description || !price || !category) {
+//       return res.json({ success: false, message: "Missing required fields" });
+//     }
+
+//     const priceNum = Number(price);
+//     const discountRaw = req.body.discountPrice;
+//     const discountNum =
+//       discountRaw !== undefined && discountRaw !== "" ? Number(discountRaw) : 0;
+//     const discountPercentage =
+//       discountNum > 0 && discountNum < priceNum
+//         ? Math.round(((priceNum - discountNum) / priceNum) * 100)
+//         : 0;
+
+//     const updateData = {
+//       name,
+//       description,
+//       price: priceNum,
+//       discountPrice: discountNum,
+//       discountPercentage,
+//       category,
+//       bestseller: bestseller === "true" || bestseller === true,
+//     };
+
+//     const specs = parseSpecs(req.body);
+//     if (Object.values(specs).some((v) => v !== 0 && v !== "other")) {
+//       updateData.specs = specs;
+//     }
+
+//     const imagesGold = await uploadMany(req.files?.goldImages || []);
+//     const imagesRose = await uploadMany(req.files?.roseImages || []);
+//     const imagesWhite = await uploadMany(req.files?.whiteImages || []);
+
+//     const product = await productModel.findById(productId);
+//     if (!product) {
+//       cleanupTempFiles(req.files);
+//       return res.json({ success: false, message: "Product not found" });
+//     }
+
+//     const nextImagesByColor = {
+//       ...product.imagesByColor.toObject?.() || product.imagesByColor,
+//     };
+
+//     if (imagesGold.length) nextImagesByColor["gold"] = imagesGold;
+//     if (imagesRose.length) nextImagesByColor["rose-gold"] = imagesRose;
+//     if (imagesWhite.length) nextImagesByColor["white-gold"] = imagesWhite;
+
+//     if (imagesGold.length || imagesRose.length || imagesWhite.length) {
+//       updateData.imagesByColor = nextImagesByColor;
+//       const flat = [
+//         ...(nextImagesByColor["gold"] || []),
+//         ...(nextImagesByColor["rose-gold"] || []),
+//         ...(nextImagesByColor["white-gold"] || []),
+//       ];
+//       if (flat.length) updateData.image = flat;
+//     }
+
+//     const updated = await productModel.findByIdAndUpdate(productId, updateData, {
+//       new: true,
+//     });
+//     cleanupTempFiles(req.files);
+
+//     // 🔥 Invalidate Redis cache
+//     const redisClient = await connectRedis();
+//     await redisClient.del("all_products");
+//     await redisClient.del(`product_${productId}`);
+
+//     res.json({ success: true, message: "Product Updated Successfully", product: updated });
+//   } catch (err) {
+//     console.log("updateProduct error:", err);
+//     cleanupTempFiles(req.files);
+//     res.json({ success: false, message: err.message });
+//   }
+// };
+
+// // ---------- LIST ----------
+// const listProducts = async (req, res) => {
+//   try {
+//     const redisClient = await connectRedis();
+//     const cacheKey = "all_products";
+
+//     const cached = await redisClient.get(cacheKey);
+//     if (cached) {
+//       console.log("⚡ Served from Redis Cache");
+//       return res.json({ success: true, products: JSON.parse(cached) });
+//     }
+
+//     const products = await productModel.find({});
+//     await redisClient.setEx(cacheKey, 60, JSON.stringify(products));
+
+//     res.json({ success: true, products });
+//   } catch (error) {
+//     console.log(error);
+//     res.json({ success: false, message: error.message });
+//   }
+// };
+
+// // ---------- REMOVE ----------
+// const removeProduct = async (req, res) => {
+//   try {
+//     await productModel.findByIdAndDelete(req.body.id);
+
+//     // 🔥 Invalidate Redis cache
+//     const redisClient = await connectRedis();
+//     await redisClient.del("all_products");
+//     await redisClient.del(`product_${req.body.id}`);
+
+//     res.json({ success: true, message: "Product Removed" });
+//   } catch (error) {
+//     console.log(error);
+//     res.json({ success: false, message: error.message });
+//   }
+// };
+
+// // ---------- SINGLE PRODUCT ----------
+// const singleProduct = async (req, res) => {
+//   try {
+//     const { productId } = req.body;
+//     const redisClient = await connectRedis();
+//     const cacheKey = `product_${productId}`;
+
+//     const cached = await redisClient.get(cacheKey);
+//     if (cached) {
+//       console.log("⚡ Served from Redis Cache");
+//       return res.json({ success: true, product: JSON.parse(cached) });
+//     }
+
+//     const product = await productModel.findById(productId);
+//     await redisClient.setEx(cacheKey, 120, JSON.stringify(product));
+
+//     res.json({ success: true, product });
+//   } catch (error) {
+//     console.log(error);
+//     res.json({ success: false, message: error.message });
+//   }
+// };
+
+// // ---------- CATEGORY ----------
+// const getProductsByCategory = async (req, res) => {
+//   try {
+//     const { category } = req.params;
+//     const redisClient = await connectRedis();
+//     const cacheKey = `category_${category}`;
+
+//     const cached = await redisClient.get(cacheKey);
+//     if (cached) {
+//       console.log("⚡ Served from Redis Cache");
+//       return res.json({ success: true, products: JSON.parse(cached) });
+//     }
+
+//     const products = await productModel.find({ category });
+//     await redisClient.setEx(cacheKey, 60, JSON.stringify(products));
+
+//     res.json({ success: true, products });
+//   } catch (error) {
+//     console.log(error);
+//     res.json({ success: false, message: error.message });
+//   }
+// };
+
+// // ---------- RELATED ----------
+// const getRelatedProducts = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const current = await productModel.findById(id);
+//     if (!current) return res.json({ success: false, message: "Product not found" });
+
+//     const related = await productModel
+//       .find({ category: current.category, _id: { $ne: id } })
+//       .limit(6);
+
+//     res.json({ success: true, products: related });
+//   } catch (err) {
+//     res.status(500).json({ success: false, message: err.message });
+//   }
+// };
+
+// export {
+//   listProducts,
+//   addProduct,
+//   removeProduct,
+//   singleProduct,
+//   updateProduct,
+//   getProductsByCategory,
+//   getRelatedProducts,
+// };
+
+// controllers/productController.js
 import { v2 as cloudinary } from "cloudinary";
-import productModel from "../models/productModel.js";
+import productModel, { COLOR_ENUM, SHAPE_ENUM } from "../models/productModel.js";
 import { cleanupTempFiles } from "../middleware/cloudinaryUpload.js";
-import { COLOR_ENUM, SHAPE_ENUM } from "../models/productModel.js";
 import connectRedis from "../config/redis.js";
 
-// ---- helpers ----
+/* ---------- helpers ---------- */
 const parseSpecs = (body) => {
   const shape = (body.diamondShape || "round").toLowerCase();
   return {
@@ -307,7 +633,7 @@ const parseSpecs = (body) => {
 
 const uploadMany = async (filesArr = []) => {
   if (!Array.isArray(filesArr) || !filesArr.length) return [];
-  const sliced = filesArr.slice(0, 10); // cap per color
+  const sliced = filesArr.slice(0, 10); // limit
   const uploaded = await Promise.all(
     sliced.map((f) =>
       cloudinary.uploader.upload(f.path, {
@@ -323,53 +649,45 @@ const uploadMany = async (filesArr = []) => {
   return uploaded.map((r) => r.secure_url);
 };
 
-// ---------- ADD ----------
+/* ---------- cache invalidation helper ---------- */
+const invalidateProductsCache = async (redisClient, productId = null) => {
+  try {
+    const keys = [];
+    for await (const key of redisClient.scanIterator({ MATCH: "products_preview:*", COUNT: 100 })) {
+      keys.push(key);
+    }
+    for await (const key of redisClient.scanIterator({ MATCH: "category_*", COUNT: 100 })) {
+      keys.push(key);
+    }
+    if (keys.length) await redisClient.del(keys);
+    if (productId) await redisClient.del(`product_${productId}`);
+    await redisClient.del("all_products");
+  } catch (e) {
+    console.error("invalidateProductsCache error:", e);
+  }
+};
+
+/* ---------- ADD ---------- */
 const addProduct = async (req, res) => {
   try {
-    const {
-      name,
-      description,
-      price,
-      discountPrice,
-      category,
-      bestseller,
-      productWeight,
-      goldWeight,
-      diamondCarat,
-      diamondShape,
-      numberOfDiamonds,
-      makingCharge,
-      gstPercent,
-      makingChargePerGram,
-      skuGold,
-      skuRose,
-      skuWhite,
-    } = req.body;
-
+    const { name, description, price, discountPrice, category, bestseller, gstPercent, makingChargePerGram, skuGold, skuRose, skuWhite } = req.body;
     if (!name || !description || !price || !category) {
-      return res.json({ success: false, message: "Missing required fields" });
+      return res.status(400).json({ success: false, message: "Missing required fields" });
     }
 
     const imagesGold = await uploadMany(req.files?.goldImages || []);
     const imagesRose = await uploadMany(req.files?.roseImages || []);
     const imagesWhite = await uploadMany(req.files?.whiteImages || []);
-
     const flatImages = [...imagesGold, ...imagesRose, ...imagesWhite];
+
     if (!flatImages.length) {
       cleanupTempFiles(req.files);
-      return res.json({ success: false, message: "At least one image is required" });
+      return res.status(400).json({ success: false, message: "At least one image is required" });
     }
 
-    const defRaw = String(req.body.defaultColor || "").toLowerCase();
-    let defaultColor = COLOR_ENUM.includes(defRaw) ? defRaw : "gold";
-    const firstNonEmpty =
-      imagesGold.length ? "gold" : imagesRose.length ? "rose-gold" : "white-gold";
-    if (
-      (defaultColor === "gold" && !imagesGold.length) ||
-      (defaultColor === "rose-gold" && !imagesRose.length) ||
-      (defaultColor === "white-gold" && !imagesWhite.length)
-    ) {
-      defaultColor = firstNonEmpty;
+    let defaultColor = (req.body.defaultColor || "gold").toLowerCase();
+    if (!COLOR_ENUM.includes(defaultColor)) {
+      defaultColor = imagesGold.length ? "gold" : imagesRose.length ? "rose-gold" : "white-gold";
     }
 
     const priceNum = Number(price);
@@ -390,6 +708,7 @@ const addProduct = async (req, res) => {
       discountPercentage,
       bestseller: bestseller === "true" || bestseller === true,
       image: flatImages,
+      thumbnail: flatImages[0], // ✅ always ensure thumbnail
       imagesByColor: {
         gold: imagesGold,
         "rose-gold": imagesRose,
@@ -410,30 +729,45 @@ const addProduct = async (req, res) => {
     await product.save();
     cleanupTempFiles(req.files);
 
-    // 🔥 Invalidate Redis cache
     const redisClient = await connectRedis();
-    await redisClient.del("all_products");
+    await invalidateProductsCache(redisClient);
 
-    res.json({ success: true, message: "Product Added Successfully" });
+    res.json({ success: true, message: "Product Added Successfully", productId: product._id });
   } catch (err) {
-    console.log("addProduct error:", err);
+    console.error("addProduct error:", err);
     cleanupTempFiles(req.files);
-    res.json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
-// ---------- UPDATE ----------
+/* ---------- REMOVE ---------- */
+const removeProduct = async (req, res) => {
+  try {
+    const id = req.body.id;
+    if (!id) return res.status(400).json({ success: false, message: "Missing id" });
+
+    await productModel.findByIdAndDelete(id);
+
+    const redisClient = await connectRedis();
+    await invalidateProductsCache(redisClient, id);
+
+    res.json({ success: true, message: "Product Removed" });
+  } catch (error) {
+    console.error("removeProduct error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/* ---------- UPDATE ---------- */
 const updateProduct = async (req, res) => {
   try {
     const { productId, name, description, price, category, bestseller } = req.body;
     if (!productId || !name || !description || !price || !category) {
-      return res.json({ success: false, message: "Missing required fields" });
+      return res.status(400).json({ success: false, message: "Missing required fields" });
     }
 
     const priceNum = Number(price);
-    const discountRaw = req.body.discountPrice;
-    const discountNum =
-      discountRaw !== undefined && discountRaw !== "" ? Number(discountRaw) : 0;
+    const discountNum = req.body.discountPrice ? Number(req.body.discountPrice) : 0;
     const discountPercentage =
       discountNum > 0 && discountNum < priceNum
         ? Math.round(((priceNum - discountNum) / priceNum) * 100)
@@ -458,146 +792,150 @@ const updateProduct = async (req, res) => {
     const imagesRose = await uploadMany(req.files?.roseImages || []);
     const imagesWhite = await uploadMany(req.files?.whiteImages || []);
 
-    const product = await productModel.findById(productId);
+    const product = await productModel.findById(productId).lean();
     if (!product) {
       cleanupTempFiles(req.files);
-      return res.json({ success: false, message: "Product not found" });
+      return res.status(404).json({ success: false, message: "Product not found" });
     }
 
-    const nextImagesByColor = {
-      ...product.imagesByColor.toObject?.() || product.imagesByColor,
-    };
-
+    const nextImagesByColor = { ...(product.imagesByColor || {}) };
     if (imagesGold.length) nextImagesByColor["gold"] = imagesGold;
     if (imagesRose.length) nextImagesByColor["rose-gold"] = imagesRose;
     if (imagesWhite.length) nextImagesByColor["white-gold"] = imagesWhite;
 
     if (imagesGold.length || imagesRose.length || imagesWhite.length) {
       updateData.imagesByColor = nextImagesByColor;
-      const flat = [
+      const allImages = [
         ...(nextImagesByColor["gold"] || []),
         ...(nextImagesByColor["rose-gold"] || []),
         ...(nextImagesByColor["white-gold"] || []),
       ];
-      if (flat.length) updateData.image = flat;
+      updateData.image = allImages;
+      updateData.thumbnail = allImages[0] || product.thumbnail; // ✅ thumbnail always maintained
     }
 
-    const updated = await productModel.findByIdAndUpdate(productId, updateData, {
-      new: true,
-    });
+    const updated = await productModel.findByIdAndUpdate(productId, updateData, { new: true }).lean();
     cleanupTempFiles(req.files);
 
-    // 🔥 Invalidate Redis cache
     const redisClient = await connectRedis();
-    await redisClient.del("all_products");
-    await redisClient.del(`product_${productId}`);
+    await invalidateProductsCache(redisClient, productId);
 
     res.json({ success: true, message: "Product Updated Successfully", product: updated });
   } catch (err) {
-    console.log("updateProduct error:", err);
+    console.error("updateProduct error:", err);
     cleanupTempFiles(req.files);
-    res.json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
-// ---------- LIST ----------
+/* ---------- LIST (full docs, not projection) ---------- */
 const listProducts = async (req, res) => {
   try {
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(10, parseInt(req.query.limit) || 20));
+    const skip = (page - 1) * limit;
+
     const redisClient = await connectRedis();
-    const cacheKey = "all_products";
+    const cacheKey = `products_preview:page:${page}:limit:${limit}`;
 
     const cached = await redisClient.get(cacheKey);
     if (cached) {
-      console.log("⚡ Served from Redis Cache");
-      return res.json({ success: true, products: JSON.parse(cached) });
+      return res.json({ success: true, products: JSON.parse(cached), cached: true });
     }
 
-    const products = await productModel.find({});
-    await redisClient.setEx(cacheKey, 60, JSON.stringify(products));
+    const docs = await productModel.find({}).sort({ date: -1 }).skip(skip).limit(limit).lean();
 
-    res.json({ success: true, products });
+    // Ensure thumbnail always exists
+    const productsPreview = docs.map((d) => ({
+      ...d,
+      thumbnail: d.thumbnail || (Array.isArray(d.image) && d.image.length ? d.image[0] : null),
+    }));
+
+    await redisClient.setEx(cacheKey, 300, JSON.stringify(productsPreview));
+    return res.json({ success: true, products: productsPreview, cached: false });
   } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: error.message });
+    console.error("listProducts error:", error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// ---------- REMOVE ----------
-const removeProduct = async (req, res) => {
-  try {
-    await productModel.findByIdAndDelete(req.body.id);
-
-    // 🔥 Invalidate Redis cache
-    const redisClient = await connectRedis();
-    await redisClient.del("all_products");
-    await redisClient.del(`product_${req.body.id}`);
-
-    res.json({ success: true, message: "Product Removed" });
-  } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: error.message });
-  }
-};
-
-// ---------- SINGLE PRODUCT ----------
+/* ---------- SINGLE PRODUCT ---------- */
 const singleProduct = async (req, res) => {
   try {
     const { productId } = req.body;
+    if (!productId) return res.status(400).json({ success: false, message: "Missing productId" });
+
     const redisClient = await connectRedis();
     const cacheKey = `product_${productId}`;
 
     const cached = await redisClient.get(cacheKey);
     if (cached) {
-      console.log("⚡ Served from Redis Cache");
-      return res.json({ success: true, product: JSON.parse(cached) });
+      return res.json({ success: true, product: JSON.parse(cached), cached: true });
     }
 
-    const product = await productModel.findById(productId);
-    await redisClient.setEx(cacheKey, 120, JSON.stringify(product));
+    const product = await productModel.findById(productId).lean();
+    if (!product) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
 
-    res.json({ success: true, product });
+    product.thumbnail = product.thumbnail || (Array.isArray(product.image) && product.image.length ? product.image[0] : null);
+
+    await redisClient.setEx(cacheKey, 900, JSON.stringify(product));
+    return res.json({ success: true, product, cached: false });
   } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: error.message });
+    console.error("singleProduct error:", error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// ---------- CATEGORY ----------
+/* ---------- CATEGORY ---------- */
 const getProductsByCategory = async (req, res) => {
   try {
     const { category } = req.params;
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(10, parseInt(req.query.limit) || 20));
+    const skip = (page - 1) * limit;
+
     const redisClient = await connectRedis();
-    const cacheKey = `category_${category}`;
+    const cacheKey = `category_${category}:page:${page}:limit:${limit}`;
 
     const cached = await redisClient.get(cacheKey);
     if (cached) {
-      console.log("⚡ Served from Redis Cache");
-      return res.json({ success: true, products: JSON.parse(cached) });
+      return res.json({ success: true, products: JSON.parse(cached), cached: true });
     }
 
-    const products = await productModel.find({ category });
-    await redisClient.setEx(cacheKey, 60, JSON.stringify(products));
+    const products = await productModel.find({ category }).sort({ date: -1 }).skip(skip).limit(limit).lean();
 
-    res.json({ success: true, products });
+    const productsPreview = products.map((d) => ({
+      ...d,
+      thumbnail: d.thumbnail || (Array.isArray(d.image) && d.image.length ? d.image[0] : null),
+    }));
+
+    await redisClient.setEx(cacheKey, 300, JSON.stringify(productsPreview));
+    return res.json({ success: true, products: productsPreview, cached: false });
   } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: error.message });
+    console.error("getProductsByCategory error:", error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// ---------- RELATED ----------
+/* ---------- RELATED ---------- */
 const getRelatedProducts = async (req, res) => {
   try {
     const { id } = req.params;
-    const current = await productModel.findById(id);
-    if (!current) return res.json({ success: false, message: "Product not found" });
+    const current = await productModel.findById(id).lean();
+    if (!current) return res.status(404).json({ success: false, message: "Product not found" });
 
-    const related = await productModel
-      .find({ category: current.category, _id: { $ne: id } })
-      .limit(6);
+    const related = await productModel.find({ category: current.category, _id: { $ne: id } }).limit(6).lean();
 
-    res.json({ success: true, products: related });
+    const relatedPreview = related.map((d) => ({
+      ...d,
+      thumbnail: d.thumbnail || (Array.isArray(d.image) && d.image.length ? d.image[0] : null),
+    }));
+
+    res.json({ success: true, products: relatedPreview });
   } catch (err) {
+    console.error("getRelatedProducts error:", err);
     res.status(500).json({ success: false, message: err.message });
   }
 };
