@@ -46,7 +46,7 @@ const Login = ({ setToken }) => {
         <div className="max-w-6xl mx-auto flex items-center justify-between px-4 py-4">
           <div className="flex items-center gap-3">
             {/* {logo && <img src={logo} alt="GEMS GLOBAL" className="h-9" />} */}
-            <span className="text-xl sm:text-2xl font-semibold text-[#4f1c51]">
+            <span className="text-xl sm:text-2xl font-semibold text-BLACK">
               GEMS GLOBAL Admin
             </span>
           </div>
@@ -61,7 +61,7 @@ const Login = ({ setToken }) => {
         <div className="max-w-6xl mx-auto px-4 py-10 sm:py-14">
           <div className="mx-auto max-w-md">
             <div className="bg-white rounded-2xl shadow-xl ring-1 ring-purple-100/60 p-6 sm:p-8">
-              <h1 className="text-2xl sm:text-3xl font-bold text-[#4f1c51] mb-1 text-center">
+              <h1 className="text-2xl sm:text-3xl font-bold text-BLACK mb-1 text-center">
                 Admin Sign In
               </h1>
               <p className="text-sm text-gray-600 text-center mb-6">
