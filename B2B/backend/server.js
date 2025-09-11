@@ -31,8 +31,24 @@ app.use(
 );
 
 //middlewares
-app.use(express.json())
-app.use(cors());
+const allowedOrigins = [
+  "https://elysianjewels.ca",
+  "https://admin.elysianjewels.ca",
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true); // Postman/mobile apps allow
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
 
 
 //api end points
@@ -45,6 +61,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/wishlist", wishlistRouter);
 app.use("/api/forms", formsRouter);
 app.use("/api/pricing", pricingRouter);
+
+
 
 
 app.get('/',(req,res)=>{
