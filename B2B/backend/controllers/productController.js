@@ -743,28 +743,34 @@ const addProduct = async (req, res) => {
 /* ---------- REMOVE ---------- */
 const removeProduct = async (req, res) => {
   try {
+    // Correct destructuring from request body
     const { id } = req.body;
 
+    // Check if id is provided
     if (!id) {
       return res.status(400).json({ success: false, message: "Missing product id" });
     }
 
+    // Validate MongoDB ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ success: false, message: "Invalid product id" });
     }
 
+    // Delete product from DB
     const deletedProduct = await productModel.findByIdAndDelete(id);
 
     if (!deletedProduct) {
       return res.status(404).json({ success: false, message: "Product not found" });
     }
 
+    // Send success response
     return res.json({ success: true, message: "Product removed successfully" });
   } catch (error) {
-    console.error("removeProduct error:", error); // ✅ Console me full stack dekho
+    console.error("removeProduct error:", error); // check backend console for full error
     return res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 
 
