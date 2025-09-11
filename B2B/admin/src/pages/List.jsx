@@ -21,21 +21,27 @@ const List = ({ token }) => {
 const removeProduct = async (id) => {
   try {
     const { data } = await axios.post(
-      `${backendUrl}/product/remove`,
+      `${backendUrl}/product/remove`, // only one slash
       { id },
-      { headers: { Authorization: `Bearer ${token}` } }
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
     );
+
     if (data.success) {
-      toast.success(data.message || 'Deleted');
-      fetchList();
+      toast.success(data.message || "Deleted");
+      fetchList(); // refresh the list
     } else {
-      toast.error(data.message || 'Delete failed');
+      toast.error(data.message || "Delete failed");
     }
   } catch (err) {
     console.error(err);
     toast.error(err.response?.data?.message || err.message);
   }
 };
+
 
 // const removeProduct = async (id, token, fetchList, backendUrl) => {
 //   try {
