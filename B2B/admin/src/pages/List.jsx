@@ -18,50 +18,50 @@ const List = ({ token }) => {
     }
   }
 
-// const removeProduct = async (id) => {
-//   try {
-//     const { data } = await axios.post(
-//       `${backendUrl}/product/remove`,
-//       { id },
-//       { headers: { Authorization: `Bearer ${token}` } }
-//     );
-//     if (data.success) {
-//       toast.success(data.message || 'Deleted');
-//       fetchList();
-//     } else {
-//       toast.error(data.message || 'Delete failed');
-//     }
-//   } catch (err) {
-//     console.error(err);
-//     toast.error(err.response?.data?.message || err.message);
-//   }
-// };
-
-const removeProduct = async (id, token, fetchList, backendUrl) => {
+const removeProduct = async (id) => {
   try {
-    if (!id) return toast.error("Product ID missing");
-
     const { data } = await axios.post(
       `${backendUrl}/product/remove`,
       { id },
-      {
-        headers: token
-          ? { Authorization: `Bearer ${token}` }
-          : {}, // token optional
-      }
+      { headers: { Authorization: `Bearer ${token}` } }
     );
-
     if (data.success) {
-      toast.success(data.message || "Product deleted successfully");
-      if (typeof fetchList === "function") fetchList(); // refresh list
+      toast.success(data.message || 'Deleted');
+      fetchList();
     } else {
-      toast.error(data.message || "Delete failed");
+      toast.error(data.message || 'Delete failed');
     }
   } catch (err) {
-    console.error("removeProduct error:", err);
-    toast.error(err.response?.data?.message || err.message || "Something went wrong");
+    console.error(err);
+    toast.error(err.response?.data?.message || err.message);
   }
 };
+
+// const removeProduct = async (id, token, fetchList, backendUrl) => {
+//   try {
+//     if (!id) return toast.error("Product ID missing");
+
+//     const { data } = await axios.post(
+//       `${backendUrl}/product/remove`,
+//       { id },
+//       {
+//         headers: token
+//           ? { Authorization: `Bearer ${token}` }
+//           : {}, // token optional
+//       }
+//     );
+
+//     if (data.success) {
+//       toast.success(data.message || "Product deleted successfully");
+//       if (typeof fetchList === "function") fetchList(); // refresh list
+//     } else {
+//       toast.error(data.message || "Delete failed");
+//     }
+//   } catch (err) {
+//     console.error("removeProduct error:", err);
+//     toast.error(err.response?.data?.message || err.message || "Something went wrong");
+//   }
+// };
 
   const editProduct = (id) => navigate(`/edit?id=${id}`)
 
