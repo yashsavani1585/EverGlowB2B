@@ -10,8 +10,13 @@ const BRACELETProductionSection = () => {
 
   if (loading) {
     return (
-      <div className="min-h-[40vh] flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-[#4f1c51] border-t-transparent rounded-full animate-spin" />
+      <div className="max-w-7xl mx-auto px-4 py-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div
+            key={i}
+            className="w-full h-[250px] bg-gray-200 animate-pulse rounded-lg"
+          />
+        ))}
       </div>
     );
   }

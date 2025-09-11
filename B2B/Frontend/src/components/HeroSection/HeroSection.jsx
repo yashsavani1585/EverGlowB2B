@@ -52,22 +52,24 @@ const HeroSection = () => {
     <section className="relative w-full">
       <Swiper
         modules={[Autoplay]}
-        loop={true}
+        loop
         autoplay={{
           delay: 3000,
           disableOnInteraction: false,
         }}
-        speed={1000}
+        speed={800}
         className="w-full h-[180px] sm:h-[280px] md:h-[350px] lg:h-[500px] xl:h-[550px]"
       >
         {[slide1, slide2, slide3].map((slide, index) => (
           <SwiperSlide key={index}>
-            <div
-              className="w-full h-full bg-cover bg-center"
-              style={{ backgroundImage: `url(${slide})` }}
-            >
-              {/* Optional Overlay */}
-              <div className="absolute inset-0 bg-black/20"></div>
+            <div className="relative w-full h-full">
+              <img
+                src={slide}
+                alt={`Slide ${index + 1}`}
+                loading="lazy"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/20" />
             </div>
           </SwiperSlide>
         ))}
