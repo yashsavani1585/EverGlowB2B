@@ -13,6 +13,8 @@ import authRoutes from "./routes/auth.routes.js";
 import formsRouter from "./routes/forms.routes.js";
 import pricingRouter from "./routes/pricingRoutes.js";
 import connectRedis from "./config/redis.js";
+import path from "path";
+import { fileURLToPath } from "url";
 
 // App Config
 const app = express();
@@ -21,6 +23,14 @@ const port = process.env.PORT || 4000;
 connectDB();
 connectCloudinary();
 connectRedis();
+
+const __filename = fileURLToPath(import.meta.url);  
+// Get the directory of this file
+const __dirname = path.dirname(__filename);
+
+// Print them
+console.log("__filename:", __filename);
+console.log("__dirname :", __dirname);
 
 // ✅ Body parsers
 app.use(express.json());
@@ -72,10 +82,21 @@ app.use("/api/wishlist", wishlistRouter);
 app.use("/api/forms", formsRouter);
 app.use("/api/pricing", pricingRouter);
 
+const frontendPath = path.join(__dirname, "../Frontend/dist");
+
+app.use(express.static(frontendPath));
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(frontendPath, "index.html"));
+});
+
+
 // Test route
 app.get("/", (req, res) => {
   res.send("API Working");
 });
+
+
 
 // Start server
 app.listen(port, () => console.log("Server started on PORT: " + port));
