@@ -753,29 +753,23 @@ const removeProduct = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid product id" });
     }
 
-    // DB se remove
     const deletedProduct = await productModel.findByIdAndDelete(id);
+
     if (!deletedProduct) {
       return res.status(404).json({ success: false, message: "Product not found" });
     }
 
-    // Redis ko 2 sec baad invalidate kare
-    setTimeout(async () => {
-      try {
-        const redisClient = await connectRedis();
-        await invalidateProductsCache(redisClient, id);
-        console.log(`✅ Cache invalidated for product ${id}`);
-      } catch (err) {
-        console.error("Redis invalidate error:", err);
-      }
-    }, 2000);
-
     return res.json({ success: true, message: "Product removed successfully" });
   } catch (error) {
-    console.error("removeProduct error:", error);
+    console.error("removeProduct error:", error); // ✅ Console me full stack dekho
     return res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
+
+
+
 
 
 /* ---------- UPDATE ---------- */
@@ -855,29 +849,27 @@ const listProducts = async (req, res) => {
     const limit = Math.min(100, Math.max(10, parseInt(req.query.limit) || 20));
     const skip = (page - 1) * limit;
 
-    const redisClient = await connectRedis();
-    const cacheKey = `products_preview:page:${page}:limit:${limit}`;
+    // Direct DB query
+    const docs = await productModel
+      .find({}, { __v: 0 }) // __v remove for smaller payload
+      .sort({ date: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(); // lean makes query faster and returns plain JS objects
 
-    const cached = await redisClient.get(cacheKey);
-    if (cached) {
-      return res.json({ success: true, products: JSON.parse(cached), cached: true });
-    }
-
-    const docs = await productModel.find({}).sort({ date: -1 }).skip(skip).limit(limit).lean();
-
-    // Ensure thumbnail always exists
+    // Ensure thumbnail exists
     const productsPreview = docs.map((d) => ({
       ...d,
       thumbnail: d.thumbnail || (Array.isArray(d.image) && d.image.length ? d.image[0] : null),
     }));
 
-    await redisClient.setEx(cacheKey, 300, JSON.stringify(productsPreview));
-    return res.json({ success: true, products: productsPreview, cached: false });
+    return res.json({ success: true, products: productsPreview });
   } catch (error) {
     console.error("listProducts error:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 /* ---------- SINGLE PRODUCT ---------- */
 const singleProduct = async (req, res) => {
