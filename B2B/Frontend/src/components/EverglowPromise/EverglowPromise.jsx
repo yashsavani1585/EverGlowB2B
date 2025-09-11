@@ -40,7 +40,7 @@ const EverglowPromise = () => {
         {/* Left Heading (desktop) */}
         <div className="hidden md:block w-full lg:w-1/3 text-center lg:text-left relative">
           <h3 className="text-4xl md:text-5xl font-serif text-black" style={{ fontFamily: "'Garamond', serif" }}>
-            GEMS GLOBAL
+            ELYSIAN JEWELS
           </h3>
           <h1
             className="text-6xl md:text-7xl font-serif font-bold text-black leading-tight"

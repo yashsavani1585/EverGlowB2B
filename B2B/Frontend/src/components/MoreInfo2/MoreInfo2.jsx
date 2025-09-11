@@ -61,7 +61,7 @@ const MoreInfo2 = () => {
   const [fetchErr, setFetchErr] = useState("");
   const materials = ["9K", "10K", "14K", "18K"];
   const [selectedMaterial, setSelectedMaterial] = useState("14K");
-   const [liveRate, setLiveRate] = useState(null); // ₹/g for selectedMaterial
+  const [liveRate, setLiveRate] = useState(null); // ₹/g for selectedMaterial
 
   const mainSwiperRef = useRef(null);
   const navigate = useNavigate();
@@ -82,7 +82,7 @@ const MoreInfo2 = () => {
   };
 
   /* ---------- fetch product ---------- */
-    useEffect(() => {
+  useEffect(() => {
     let active = true;
     (async () => {
       try {
@@ -91,7 +91,7 @@ const MoreInfo2 = () => {
           params: { carat: caratParam(selectedMaterial) }
         });
         if (!active) return;
-        if (data?.success && typeof data.ratePerGram === "number") {          
+        if (data?.success && typeof data.ratePerGram === "number") {
           setLiveRate(data.ratePerGram);
         } else {
           setPriceErr("Live rate unavailable. Using base price.");
@@ -191,19 +191,19 @@ const MoreInfo2 = () => {
   }, [variant, availableColors]);
 
   // purity – now safely depends on selectedColor
-// current color (gold / rose-gold / white-gold)
-const purity = useMemo(() => {
-  const map = product?.caratByColor || {};
-  const fromColor = selectedColor && map[selectedColor];
+  // current color (gold / rose-gold / white-gold)
+  const purity = useMemo(() => {
+    const map = product?.caratByColor || {};
+    const fromColor = selectedColor && map[selectedColor];
 
-  // if user clicked a material (9K, 10K, 14K, 18K) → show that
-  if (selectedMaterial) {
-    return `${selectedMaterial} ${product?.defaultColor ? `(${product.defaultColor})` : ""}`;
-  }
+    // if user clicked a material (9K, 10K, 14K, 18K) → show that
+    if (selectedMaterial) {
+      return `${selectedMaterial} ${product?.defaultColor ? `(${product.defaultColor})` : ""}`;
+    }
 
-  // fallback to backend carat map
-  return fromColor || map.gold || "14K Yellow Gold";
-}, [product?.caratByColor, selectedColor, selectedMaterial, product?.defaultColor]);
+    // fallback to backend carat map
+    return fromColor || map.gold || "14K Yellow Gold";
+  }, [product?.caratByColor, selectedColor, selectedMaterial, product?.defaultColor]);
 
 
   // Normalize image field to array
@@ -232,20 +232,20 @@ const purity = useMemo(() => {
   }, [product]);
 
   const [priceErr, setPriceErr] = useState("")
-const gstPct = Number(product?.gstPercent ?? 3);
-const mcPerGram = Number(product?.makingChargePerGram || 0);
-const goldWeight = Number(product?.specs?.goldWeight || 0);
-const metalCost = liveRate ? Math.max(0, liveRate) * Math.max(0, goldWeight) : 0;
-const makingCost = mcPerGram * Math.max(0, goldWeight);
-const dynamicSubTotal = liveRate ? (metalCost + makingCost) : finalPrice + (product?.specs?.makingCharge || 0);
-const gstAmount = Math.round((dynamicSubTotal * (gstPct / 100)));
-const dynamicTotal = dynamicSubTotal + gstAmount;
-// helper: carat string used by backend
-const caratParam = (mat) => (typeof mat === "string" ? mat.toUpperCase().replace("K","") : "14");
-const skuForColor = useMemo(() => {
-  const map = product?.skuByColor || {};
-  return (selectedColor && map[selectedColor]) || map[product?.defaultColor] || "";
-}, [product?.skuByColor, selectedColor, product?.defaultColor]);
+  const gstPct = Number(product?.gstPercent ?? 3);
+  const mcPerGram = Number(product?.makingChargePerGram || 0);
+  const goldWeight = Number(product?.specs?.goldWeight || 0);
+  const metalCost = liveRate ? Math.max(0, liveRate) * Math.max(0, goldWeight) : 0;
+  const makingCost = mcPerGram * Math.max(0, goldWeight);
+  const dynamicSubTotal = liveRate ? (metalCost + makingCost) : finalPrice + (product?.specs?.makingCharge || 0);
+  const gstAmount = Math.round((dynamicSubTotal * (gstPct / 100)));
+  const dynamicTotal = dynamicSubTotal + gstAmount;
+  // helper: carat string used by backend
+  const caratParam = (mat) => (typeof mat === "string" ? mat.toUpperCase().replace("K", "") : "14");
+  const skuForColor = useMemo(() => {
+    const map = product?.skuByColor || {};
+    return (selectedColor && map[selectedColor]) || map[product?.defaultColor] || "";
+  }, [product?.skuByColor, selectedColor, product?.defaultColor]);
 
 
   // buckets
@@ -262,6 +262,8 @@ const skuForColor = useMemo(() => {
     out.others = allImages;
     return out;
   }, [imagesByColorFromApi, allImages]);
+
+  
 
   // images to show
   const imagesToShow = useMemo(() => {
@@ -286,17 +288,17 @@ const skuForColor = useMemo(() => {
   // related demo cards (use real product image as placeholder)
   const [related, setRelated] = useState([]);
 
-useEffect(() => {
-  if (!productId) return;
-  (async () => {
-    try {
-      const { data } = await axios.get(`${backendUrl}/product/related/${productId}`);
-      if (data?.success) setRelated(data.products || []);
-    } catch (err) {
-      console.error("Failed to fetch related:", err);
-    }
-  })();
-}, [productId]);
+  useEffect(() => {
+    if (!productId) return;
+    (async () => {
+      try {
+        const { data } = await axios.get(`${backendUrl}/product/related/${productId}`);
+        if (data?.success) setRelated(data.products || []);
+      } catch (err) {
+        console.error("Failed to fetch related:", err);
+      }
+    })();
+  }, [productId]);
 
 
   /* -------------------- THE FIX IS HERE -------------------- */
@@ -401,22 +403,22 @@ useEffect(() => {
           {/* Info */}
           <div>
             <h2 className="text-xl sm:text-2xl font-bold leading-snug">{name}</h2>
-<div className="mt-1 text-sm text-gray-700">
-  {skuForColor ? <>SKU: <span className="font-semibold">{skuForColor}</span></> : "SKU: —"}
-  <span className="ml-3 border border-black px-2 py-0.5 rounded-md text-[#CEBB98]">IN STOCK</span>
-</div>
+            <div className="mt-1 text-sm text-gray-700">
+              {skuForColor ? <>SKU: <span className="font-semibold">{skuForColor}</span></> : "SKU: —"}
+              <span className="ml-3 border border-black px-2 py-0.5 rounded-md text-[#CEBB98]">IN STOCK</span>
+            </div>
 
 
-            <div className="flex flex-wrap items-center gap-3 mt-3">
+            {/* <div className="flex flex-wrap items-center gap-3 mt-3">
               <span className="text-lg sm:text-2xl font-bold">₹{formatIN(liveRate ? dynamicTotal : finalPrice)}</span>
               {!liveRate && hasDiscount && (
-    <span className="text-gray-500 line-through text-sm sm:text-base">₹{formatIN(price)}</span>
-  )}
+                <span className="text-gray-500 line-through text-sm sm:text-base">₹{formatIN(price)}</span>
+              )}
               {!liveRate && hasDiscount && (
-    <span className="bg-gray-100 text-xs sm:text-sm px-2 sm:px-3 py-1 rounded-full border">Sale {pct}%</span>
-  )}
+                <span className="bg-gray-100 text-xs sm:text-sm px-2 sm:px-3 py-1 rounded-full border">Sale {pct}%</span>
+              )}
             </div>
-            {priceErr && <p className="text-xs text-red-500 mt-1">{priceErr}</p>}
+            {priceErr && <p className="text-xs text-red-500 mt-1">{priceErr}</p>} */}
             <p className="text-sm sm:text-base text-gray-600 mt-3 leading-relaxed">{desc}</p>
           </div>
 
@@ -461,14 +463,14 @@ useEffect(() => {
           {/* Buttons + Color Chips */}
           <div className="flex flex-col gap-4 w-full">
 
-            
+
             <div className="flex flex-col  gap-3  w-full">
               <Link to="/inquiry" className="flex-1">
                 {/* Buy Now */}
                 <button
                   className={`w-full py-3 rounded-md font-semibold transition ${product?._id
-                      ? "bg-[#CEBB98] text-white hover:bg-black"
-                      : "bg-gray-300 text-gray-600 cursor-not-allowed"
+                    ? "bg-[#CEBB98] text-white hover:bg-black"
+                    : "bg-gray-300 text-gray-600 cursor-not-allowed"
                     }`}
                 >
                   Inquiry Form
@@ -483,7 +485,7 @@ useEffect(() => {
 
             {/* WhatsApp */}
             <a
-              href={`https://wa.me/?text=${encodeURIComponent(
+              href={`https://wa.me/7201004243?text=${encodeURIComponent(
                 `Hi, I'm interested in ${name} (${productId}).`
               )}`}
               target="_blank"
@@ -492,16 +494,17 @@ useEffect(() => {
             >
               Order on WhatsApp
             </a>
+
           </div>
 
           {/* Offers */}
           <div className="bg-[#CEBB98] text-white rounded-lg p-5 space-y-4">
             <h3 className="font-semibold text-lg">Offers For You</h3>
-            {["FLAT 100% off", "Everglow Jewels"].map((offer, idx) => (
+            {["FLAT 100% off", "ELYSIAN Jewels"].map((offer, idx) => (
               <div key={idx} className="bg-white text-black rounded-md p-4 shadow-sm">
                 <p className="font-bold">{offer}</p>
                 <p className="text-sm text-gray-600 mt-1">
-                  Comes with authenticity & guarantee certificate of Everglow
+                  Comes with authenticity & guarantee certificate of ELYSIAN
                   Jewels with lifetime exchange guarantee.
                 </p>
               </div>
@@ -511,16 +514,26 @@ useEffect(() => {
           {/* Shipping & Return */}
           <div className="space-y-3">
             {["Shipping", "Return Policy"].map((policy, idx) => (
-              <details key={idx} className="border rounded-md px-4 py-3 cursor-pointer">
+              <details
+                key={idx}
+                className="border rounded-md px-4 py-3 cursor-pointer"
+              >
                 <summary className="font-semibold">{policy}</summary>
-                <p className="text-sm text-gray-600 mt-2">
-                  {policy === "Shipping"
-                    ? "Free shipping on all orders above ₹1000. Delivery in 4-6 business days."
-                    : "Easy 7-day return & exchange policy with 100% refund guarantee."}
-                </p>
+                {policy === "Shipping" ? (
+                  <ul className="list-disc list-inside text-sm text-gray-600 mt-2 space-y-1">
+                    <li>All confirmed orders will be dispatched within 25–30 business days.</li>
+                    <li>Custom or made-to-order products require 8–10 business days for manufacturing before shipment.</li>
+                  </ul>
+                ) : (
+                  <ul className="list-disc list-inside text-sm text-gray-600 mt-2 space-y-1">
+                    <li>Orders can be cancelled within 24 hours of placement.</li>
+                    <li>If you face sizing issues, you may request a replacement within 7 days of receiving the product.</li>
+                  </ul>
+                )}
               </details>
             ))}
           </div>
+
         </div>
       </div>
 
@@ -543,7 +556,7 @@ useEffect(() => {
             <div className="bg-white rounded-lg shadow p-6">
               <h3 className="text-lg font-semibold text-yellow-700 mb-2">Purity</h3>
               <p className="text-sm text-gray-700">
-                {purity} 
+                {purity}
               </p>
             </div>
 
@@ -576,19 +589,22 @@ useEffect(() => {
       </div>
 
 
-{/* RELATED PRODUCTS */}
-<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-  <h3 className="text-xl font-semibold mb-6 text-center">Related Products</h3>
-  {related.length > 0 ? (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-      {related.map((p) => (
-        <ProductCard key={p._id} product={p} />
-      ))}
-    </div>
-  ) : (
-    <p className="text-center text-gray-500">No related products found.</p>
-  )}
-</div>
+      {/* RELATED PRODUCTS */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <h3 className="text-xl font-semibold mb-6 text-center">Related Products</h3>
+        {related.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {/* {related.map((p) => (
+              <ProductCard key={p._id} product={p} />
+            ))} */}
+            {related.slice(0, 3).map((p) => (
+              <ProductCard key={p.id || p._id} product={p} />
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-gray-500">No related products found.</p>
+        )}
+      </div>
 
     </>
   );

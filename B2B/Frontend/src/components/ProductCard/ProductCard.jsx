@@ -746,14 +746,14 @@ const ProductCard = ({ product, imageH = "h-[150px] md:h-[200px]" }) => {
     return subTotal + gstAmount;
   }, [live14k, goldWeight, makingPerGram, gstPercent]);
 
-  const displayPrice = dynamicTotal ?? Number(product?.price || 0);
   const title = product?.title || product?.name || "—";
 
   // ✅ Robust image handling
   const cover =
     (Array.isArray(product?.images) && product.images[0]) ||
-    (Array.isArray(product?.image) && product.image[0]) ||
+    (Array.isArray(product?.image) && product.image[1]) ||
     product?.image ||
+    product?.images
     "/fallback.png";
 
   return (
@@ -811,19 +811,7 @@ const ProductCard = ({ product, imageH = "h-[150px] md:h-[200px]" }) => {
           {title}
         </h3>
 
-        <div className="flex justify-between items-center mb-3">
-          <div className="flex flex-col">
-            <span className="text-lg font-semibold text-black">
-              ₹{formatIN(displayPrice)}
-            </span>
-          </div>
 
-          {!!product.oldPrice && (
-            <span className="text-sm line-through text-gray-700">
-              ₹{formatIN(product.oldPrice)}
-            </span>
-          )}
-        </div>
 
         {/* Buttons */}
         <div className="mt-auto flex gap-2">

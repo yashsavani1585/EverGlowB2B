@@ -165,7 +165,7 @@ import {
   FaFacebookF,
   FaLinkedinIn,
   FaPinterestP,
-  FaYoutube 
+  FaYoutube
 } from "react-icons/fa";
 import { IoIosArrowForward, IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import bgurl from "../../assets/bgurl.png";
@@ -180,10 +180,10 @@ export default function Footer() {
 
   const socialLinks = [
     { icon: FaInstagram, href: "https://www.instagram.com/gemsglobal_official?igsh=bTZ6bm9iaTVrMWFw" },
-    { icon: FaWhatsapp, href: "https://wa.me/yourNumber" },
-    { icon: FaFacebookF, href: "https://facebook.com/yourpage" },
-    { icon: FaYoutube , href: "https://linkedin.com/in/yourprofile" },
-    { icon: FaPinterestP, href: "hhttps://in.pinterest.com/gemsglobaljewel" },
+    { icon: FaWhatsapp, href: "https://wa.me/7201004243" },
+    { icon: FaFacebookF, href: "https://www.facebook.com/share/1R6EAEVksR/" },
+    { icon: FaYoutube, href: "www.youtube.com/@gemsglobaljewels" },
+    { icon: FaPinterestP, href: "https://in.pinterest.com/gemsglobaljewel" },
   ];
 
 
@@ -211,14 +211,13 @@ export default function Footer() {
     {
       title: "OUR COMPANY",
       content: [
-        { label: "Custom Jewellery", href: "/custom" },
-        { label: "About Us", href: "/about" },
-        { label: "About Lab Diamonds", href: "/lab-diamonds" },
-        { label: "Ring Size Guide", href: "/ring-size" },
-        { label: "FAQs", href: "/faqs" },
-        { label: "Blogs", href: "/blogs" },
-        { label: "Store Locator", href: "/stores" },
-        { label: "Contact Us", href: "/contact" },
+        { label: "Custom Jewellery", href: "/inquiry" },
+        { label: "About Us", href: "/" },
+        { label: "About Lab Diamonds", href: "/" },
+        { label: "Ring Size Guide", href: "/" },
+        { label: "FAQs", href: "/" },
+        { label: "Blogs", href: "/" },
+        { label: "Contact Us", href: "/info@elysianjewels.ca" },
       ],
     },
   ];
@@ -236,14 +235,12 @@ export default function Footer() {
             <img
               src={logoUrl}
               alt="EverGlow Logo"
-              className="w-[250%] h-[300%] object-contain bg-transparent mix-blend-normal"
+              className="w-[250%] h-[190%] object-contain bg-transparent mix-blend-normal"
             />
           </div>
-          <p className="text-1xl sm:text-1xl leading-relaxed mb-3 sm:mb-1 max-w-[220px]">
-            At  we believe that Jewellery is more than adornment.
-            Founded in 2023, our passion for quality drives us to create unique
-            pieces.
-          </p>
+         <p className="text-1xl sm:text-1xl leading-relaxed mb-2 mt-2 sm:mb-2 max-w-[220px]"> At we believe that Jewellery is more than adornment. Founded in 2023, our passion for quality drives us to create unique pieces. </p>
+
+
           <div className="flex justify-center mt-3 md:justify-start gap-3 text-base sm:text-lg">
             <div className="flex justify-center gap-6 text-2xl">
               {socialLinks.map(({ icon: Icon, href }, i) => (
@@ -312,21 +309,21 @@ export default function Footer() {
               className="w-[250%] h-[300%] object-contain bg-transparent mix-blend-normal"
             />
           </div>
-          <p className="text-sm text-center mb-4 leading-relaxed text-black/80">
+          <p className="text-sm text-center mb-4 leading-relaxed mt-4 text-black/80">
             At EverGlow we believe that Jewellery is more than adornment.
           </p>
           <div className="flex justify-center gap-6 text-2xl">
-                {socialLinks.map(({ icon: Icon, href }, i) => (
-                <a
-                  key={i}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="cursor-pointer hover:text-white transition-colors"
-                >
-                  <Icon />
-                </a>
-              ))}
+            {socialLinks.map(({ icon: Icon, href }, i) => (
+              <a
+                key={i}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="cursor-pointer hover:text-white transition-colors"
+              >
+                <Icon />
+              </a>
+            ))}
           </div>
         </div>
 
@@ -381,7 +378,7 @@ export default function Footer() {
 
       {/* Bottom Copyright */}
       <div className="mt-8 border-t border-black/40 pt-3 text-center text-xs">
-        © {new Date().getFullYear()} EverGlow. All Rights Reserved.
+        © {new Date().getFullYear()} ELYSIAN . All Rights Reserved.
       </div>
     </footer>
   );

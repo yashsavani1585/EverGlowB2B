@@ -28,6 +28,8 @@ import WishlistPage from "./Page/WishlistPage/WishlistPage";
 import MoreInfo2 from "./components/MoreInfo2/MoreInfo2";
 import OAuthCallback from "./Page/OAuthCallback";
 import InquiryFormPage from "./Page/InquiryFormPage/InquiryFormPage";
+import ShippingPolicy from "./components/ShippingPolicy/ShippingPolicy";
+import ExchangeBuyBackPolicy from "./components/ExchangeBuyBackPolicy/ExchangeBuyBackPolicy";
 
 
 
@@ -63,6 +65,8 @@ const App = () => {
           <Route path="/moreinfo2" element={<MoreInfo2/>}/>
           <Route path="/inquiry" element={<InquiryFormPage/>} />
           <Route path="/oauth/callback" element={<OAuthCallback />} />
+          <Route path="/shipping-policy" element={<ShippingPolicy/>}/>
+          <Route path="/exchange-policy" element={<ExchangeBuyBackPolicy/>} />
 
 
         </Routes>

@@ -1,5 +1,5 @@
 import React from "react";
-import logo from "../../assets/EVERGLOWLOGO.png";
+import logo from "../../assets/EverGlow2.png";
 
 const Logo = () => {
   return (
@@ -7,7 +7,7 @@ const Logo = () => {
       <img
         src={logo}
         alt="Everglow Logo"
-        className="h-20 object-contain"
+        className="h-40 object-contain"
       />
     </div>
   );

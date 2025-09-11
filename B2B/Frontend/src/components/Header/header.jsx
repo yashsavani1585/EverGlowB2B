@@ -1595,7 +1595,7 @@ const Header = () => {
               {isAuthenticated && accountOpen && (
                 <div className="absolute top-12 right-0 w-64 bg-white border shadow-lg rounded-md p-4 z-20 animate-fadeIn">
                   <p className="font-medium text-yellow-900 mb-3">
-                    Welcome To Everglow Jewels!
+                    Welcome To ELYSIAN Jewels!
                   </p>
                   <ul className="space-y-3 text-black">
                     <Link to="/profile" onClick={handleLinkClick}>
