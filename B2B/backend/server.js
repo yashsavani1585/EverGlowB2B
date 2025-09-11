@@ -17,14 +17,16 @@ import connectRedis from "./config/redis.js";
 // App Config
 const app = express();
 const port = process.env.PORT || 4000;
+
 connectDB();
 connectCloudinary();
 connectRedis();
 
-// ✅ Body parsers (missing pehle)
-app.use(express.json()); // parse JSON request body
-app.use(express.urlencoded({ extended: true })); // parse form-urlencoded body
+// ✅ Body parsers
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
+// ✅ Session
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "devsecret",
@@ -37,17 +39,22 @@ app.use(
 // ✅ CORS setup
 const allowedOrigins = [
   "http://localhost:5173",
+  "http://localhost:5174",
+  "http://127.0.0.1:5173",
+  "http://127.0.0.1:5174",
   "https://elysianjewels.ca",
   "https://admin.elysianjewels.ca",
+  "https://everglowb2b.onrender.com", // backend URL if frontend is hosted somewhere else
 ];
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin) return callback(null, true); // Postman/mobile apps allow
+      if (!origin) return callback(null, true); // allow Postman, mobile apps, curl
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       } else {
+        console.warn("Blocked by CORS:", origin);
         return callback(new Error("Not allowed by CORS"));
       }
     },
@@ -65,10 +72,10 @@ app.use("/api/wishlist", wishlistRouter);
 app.use("/api/forms", formsRouter);
 app.use("/api/pricing", pricingRouter);
 
+// Test route
 app.get("/", (req, res) => {
   res.send("API Working");
 });
 
-
-
+// Start server
 app.listen(port, () => console.log("Server started on PORT: " + port));

@@ -743,20 +743,40 @@ const addProduct = async (req, res) => {
 /* ---------- REMOVE ---------- */
 const removeProduct = async (req, res) => {
   try {
-    const id = req.body.id;
-    if (!id) return res.status(400).json({ success: false, message: "Missing id" });
+    const { id } = req.body;
 
-    await productModel.findByIdAndDelete(id);
+    if (!id) {
+      return res.status(400).json({ success: false, message: "Missing product id" });
+    }
 
-    const redisClient = await connectRedis();
-    await invalidateProductsCache(redisClient, id);
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: "Invalid product id" });
+    }
 
-    res.json({ success: true, message: "Product Removed" });
+    // DB se remove
+    const deletedProduct = await productModel.findByIdAndDelete(id);
+    if (!deletedProduct) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
+
+    // Redis ko 2 sec baad invalidate kare
+    setTimeout(async () => {
+      try {
+        const redisClient = await connectRedis();
+        await invalidateProductsCache(redisClient, id);
+        console.log(`✅ Cache invalidated for product ${id}`);
+      } catch (err) {
+        console.error("Redis invalidate error:", err);
+      }
+    }, 2000);
+
+    return res.json({ success: true, message: "Product removed successfully" });
   } catch (error) {
     console.error("removeProduct error:", error);
-    res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 /* ---------- UPDATE ---------- */
 const updateProduct = async (req, res) => {
