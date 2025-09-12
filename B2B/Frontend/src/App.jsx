@@ -30,6 +30,7 @@ import OAuthCallback from "./Page/OAuthCallback";
 import InquiryFormPage from "./Page/InquiryFormPage/InquiryFormPage";
 import ShippingPolicy from "./components/ShippingPolicy/ShippingPolicy";
 import ExchangeBuyBackPolicy from "./components/ExchangeBuyBackPolicy/ExchangeBuyBackPolicy";
+import RingGuide from "./components/RingGuide/RingGuide";
 
 
 
@@ -67,7 +68,7 @@ const App = () => {
           <Route path="/oauth/callback" element={<OAuthCallback />} />
           <Route path="/shipping-policy" element={<ShippingPolicy/>}/>
           <Route path="/exchange-policy" element={<ExchangeBuyBackPolicy/>} />
-
+          <Route path="/Ring-Guide" element={<RingGuide/>} />
 
         </Routes>
 

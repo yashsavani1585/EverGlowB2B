@@ -214,7 +214,7 @@ export default function Footer() {
         { label: "Custom Jewellery", href: "/inquiry" },
         { label: "About Us", href: "/" },
         { label: "About Lab Diamonds", href: "/" },
-        { label: "Ring Size Guide", href: "/" },
+        { label: "Ring Size Guide", href: "/Ring-Guide" },
         { label: "FAQs", href: "/" },
         { label: "Blogs", href: "/" },
         { label: "Contact Us", href: "/contact" },

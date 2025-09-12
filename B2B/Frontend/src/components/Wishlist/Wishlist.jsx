@@ -137,12 +137,12 @@ const Wishlist = () => {
                 {row.color && <span className="ml-2 text-xs text-gray-500">({row.color})</span>}
               </div>
 
-              <div className="flex items-center gap-2 mt-2">
+              {/* <div className="flex items-center gap-2 mt-2">
                 <span className="text-base font-bold">{row.priceFormatted}</span>
                 {row.mrpFormatted && (
                   <span className="text-xs text-gray-400 line-through">{row.mrpFormatted}</span>
                 )}
-              </div>
+              </div> */}
 
               {/* Buttons — wire them to handlers; keep your existing styling */}
               <div className="mt-3 flex gap-2">

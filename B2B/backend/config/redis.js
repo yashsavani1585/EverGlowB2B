@@ -25,30 +25,44 @@
 
 // export default connectRedis;
 
-import { createClient } from "redis";
+// utils/redis.js
+import Redis from "ioredis";
 
 let redisClient;
 
-const connectRedis = async () => {
+const connectRedis = () => {
   if (!redisClient) {
     if (!process.env.REDIS_URL) {
-      throw new Error("REDIS_URL is not set in .env");
+      throw new Error("❌ REDIS_URL is not set in .env");
     }
 
-    redisClient = createClient({
-      url: process.env.REDIS_URL
+    redisClient = new Redis(process.env.REDIS_URL, {
+      retryStrategy: (times) => {
+        // reconnect after delay (exponential backoff up to 2s)
+        return Math.min(times * 50, 2000);
+      },
     });
 
-    redisClient.on("error", (err) => console.error("Redis Error:", err));
-    redisClient.on("connect", () => console.log("Redis Connected"));
+    // Event listeners
+    redisClient.on("connect", () => console.log(" Redis Connected"));
+    redisClient.on("ready", () => console.log(" Redis Ready"));
+    redisClient.on("error", (err) => console.error(" Redis Error:", err));
+    redisClient.on("close", () => console.log(" Redis Connection Closed"));
+    redisClient.on("reconnecting", () => console.log(" Redis Reconnecting..."));
 
-    await redisClient.connect();
+    // Graceful shutdown
+    process.on("SIGINT", async () => {
+      await redisClient.quit();
+      console.log(" Redis Connection Closed (App Exit)");
+      process.exit(0);
+    });
   }
 
   return redisClient;
 };
 
 export default connectRedis;
+
 
 
 

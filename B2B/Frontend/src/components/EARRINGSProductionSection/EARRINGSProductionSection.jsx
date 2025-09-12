@@ -1,8 +1,8 @@
 import React from "react";
 import ProductCard from "../ProductCard/ProductCard";
-import PromotionalBanner2 from "../../assets/productAds4.png";
-import PromotionalBanner3 from "../../assets/productAds5.png";
-import PromotionalBanner1 from "../../assets/productAds6.png";
+import PromotionalBanner2 from "../../assets/productAds16.png";
+import PromotionalBanner3 from "../../assets/productAds17.png";
+import PromotionalBanner1 from "../../assets/productAds18.png";
 import useCategoryProducts from "../../hooks/useCategoryProducts";
 
 const EARRINGSProductionSection = () => {

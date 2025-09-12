@@ -22,15 +22,19 @@ const port = process.env.PORT || 4000;
 
 connectDB();
 connectCloudinary();
-connectRedis();
+const redis = connectRedis();
+
+(async () => {
+  await redis.set("hello", "world");
+  const value = await redis.get("hello");
+  console.log("Redis Value:", value); // "world"
+})();
 
 const __filename = fileURLToPath(import.meta.url);  
 // Get the directory of this file
 const __dirname = path.dirname(__filename);
 
-// Print them
-console.log("__filename:", __filename);
-console.log("__dirname :", __dirname);
+
 
 // ✅ Body parsers
 app.use(express.json());
