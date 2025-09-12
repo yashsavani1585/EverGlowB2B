@@ -26,7 +26,7 @@ const Contact = () => {
             <h3 className="font-semibold text-lg text-gray-900">
               Email Address
             </h3>
-            <p className="text-gray-600">crystovajewels@gmail.com</p>
+            <p className="text-gray-600">info@elysianjewels.ca</p>
           </div>
 
           {/* Address */}

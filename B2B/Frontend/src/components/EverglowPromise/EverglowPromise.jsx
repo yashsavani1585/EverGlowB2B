@@ -56,7 +56,7 @@ const EverglowPromise = () => {
           className="block md:hidden text-3xl font-serif font-bold text-black leading-tight text-center mb-4"
           style={{ fontFamily: "'Garamond', serif" }}
         >
-          GEMS GLOBAL Promise
+          ELYSIAN JEWELS Promise
         </h4>
 
         {/* Right Grid */}

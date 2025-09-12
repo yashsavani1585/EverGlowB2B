@@ -1,5 +1,5 @@
 import React from "react";
-import everglowlogo from "../assets/everglowlogo.png";
+import everglowlogo from "../assets/EverGlow2.png";
 
 const Navbar = ({ setToken }) => {
   return (
@@ -11,7 +11,7 @@ const Navbar = ({ setToken }) => {
         <div className="flex items-center justify-between h-20">
           {/* Logo + Title */}
           <div className="flex items-center gap-3">
-            <div className="h-16 w-20 rounded-xl overflow-hidden flex-shrink-0">
+            <div className="h-30 w-20 rounded-xl overflow-hidden flex-shrink-0">
               <img
                 src={everglowlogo}
                 alt="Everglow Logo"
@@ -19,7 +19,7 @@ const Navbar = ({ setToken }) => {
               />
             </div>
             <h1 className="text-lg sm:text-xl md:text-2xl font-semibold text-black">
-              GEMS GLOBAL ADMIN
+              ELYSIAN JEWELS ADMIN
             </h1>
           </div>
 

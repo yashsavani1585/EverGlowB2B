@@ -217,7 +217,7 @@ export default function Footer() {
         { label: "Ring Size Guide", href: "/" },
         { label: "FAQs", href: "/" },
         { label: "Blogs", href: "/" },
-        { label: "Contact Us", href: "/info@elysianjewels.ca" },
+        { label: "Contact Us", href: "/contact" },
       ],
     },
   ];
