@@ -62,23 +62,33 @@ const allowedOrigins = [
   "http://127.0.0.1:5174",
   "https://elysianjewels.ca",
   "https://admin.elysianjewels.ca",
-  "https://everglowb2b.onrender.com", // backend URL if frontend is hosted somewhere else
+  "https://everglowb2b.onrender.com",
 ];
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin) return callback(null, true); // allow Postman, mobile apps, curl
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
+      // origin undefined for tools like Postman or mobile apps
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        return callback(null, true); // allow this origin
       } else {
         console.warn("Blocked by CORS:", origin);
-        return callback(new Error("Not allowed by CORS"));
+        return callback(
+          new Error(`CORS policy: ${origin} not allowed`),
+          false
+        );
       }
     },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
   })
 );
+
+
 
 // API Routes
 app.use("/api/user", userRouter);
