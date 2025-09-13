@@ -887,22 +887,39 @@ const singleProduct = async (req, res) => {
 };
 
 /* ---------- CATEGORY ---------- */
+
+
 const getProductsByCategory = async (req, res) => {
   try {
-    const { category } = req.params;
+    const { category } = req.params; // उदाहरण: "rings"
+    console.log("Category param received:", category);
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = Math.min(100, Math.max(10, parseInt(req.query.limit) || 20));
     const skip = (page - 1) * limit;
 
-    const redisClient = await connectRedis();
-    const cacheKey = `category_${category}:page:${page}:limit:${limit}`;
+    // ✅ category lowercase enforce कर दो ताकि mismatch न हो
+    const normalizedCategory = category.toLowerCase();
 
+    const redisClient = await connectRedis();
+    const cacheKey = `category_${normalizedCategory}:page:${page}:limit:${limit}`;
+
+    // ✅ Cache check
     const cached = await redisClient.get(cacheKey);
     if (cached) {
       return res.json({ success: true, products: JSON.parse(cached), cached: true });
     }
 
-    const products = await productModel.find({ category }).sort({ date: -1 }).skip(skip).limit(limit).lean();
+    // ✅ सीधे string से filter
+    const products = await productModel
+      .find({ category: normalizedCategory })
+      .sort({ date: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    if (!products || products.length === 0) {
+      return res.status(404).json({ success: false, message: "No products found" });
+    }
 
     const productsPreview = products.map((d) => ({
       ...d,
@@ -910,12 +927,14 @@ const getProductsByCategory = async (req, res) => {
     }));
 
     await redisClient.setEx(cacheKey, 300, JSON.stringify(productsPreview));
+
     return res.json({ success: true, products: productsPreview, cached: false });
   } catch (error) {
     console.error("getProductsByCategory error:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 /* ---------- RELATED ---------- */
 const getRelatedProducts = async (req, res) => {

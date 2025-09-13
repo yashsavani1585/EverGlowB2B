@@ -22,13 +22,17 @@ const port = process.env.PORT || 4000;
 
 connectDB();
 connectCloudinary();
-const redis = connectRedis();
+connectRedis();
+// (async () => {
+//   const redis = await connectRedis();
 
-(async () => {
-  await redis.set("hello", "world");
-  const value = await redis.get("hello");
-  console.log("Redis Value:", value); // "world"
-})();
+//   await redis.set("hello", "world");
+//   const value = await redis.get("hello");
+//   console.log("Redis Value:", value); // "world"
+
+//   await redis.quit(); // shutdown
+// })();
+
 
 const __filename = fileURLToPath(import.meta.url);  
 // Get the directory of this file
